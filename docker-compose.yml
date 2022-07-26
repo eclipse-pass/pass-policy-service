@@ -11,7 +11,7 @@ services:
       - "${POLICY_SERVICE_PORT}:${POLICY_SERVICE_PORT}"
 
   fcrepo:
-    image: oapass/fcrepo:4.7.5-3.4@sha256:3e39b01edf56c149279cfc51b647df335c01f9ec38036f1724f337ae35d68fe8
+    image: oapass/fcrepo:0.1.0@sha256:d667883f2ea3c9d4235a019be4c16f8796949d864e56490c57aa896bd672027f
     container_name: fcrepo
     env_file: .env
     ports:
