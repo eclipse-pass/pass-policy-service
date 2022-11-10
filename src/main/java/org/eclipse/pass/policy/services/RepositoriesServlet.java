@@ -12,14 +12,14 @@ import javax.servlet.http.HttpServletResponse;
  * Handles requests & responses relating to repositories
  * @author David McIntyre
  */
-@WebServlet("/RepositoriesEndpoint")
-public class RepositoriesEndpoint extends HttpServlet {
+@WebServlet("/repositories")
+public class RepositoriesServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
-       
+
     /**
      * @see HttpServlet#HttpServlet()
      */
-    public RepositoriesEndpoint() {
+    public RepositoriesServlet() {
         super();
         // TODO Auto-generated constructor stub
     }

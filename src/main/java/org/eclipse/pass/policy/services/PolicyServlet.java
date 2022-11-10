@@ -12,14 +12,14 @@ import javax.servlet.http.HttpServletResponse;
  * Handles requests & responses relating to policies
  * @author David McIntyre
  */
-@WebServlet("/PolicyEndpoint")
-public class PolicyEndpoint extends HttpServlet {
+@WebServlet("/policies")
+public class PolicyServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
-       
+
     /**
      * @see HttpServlet#HttpServlet()
      */
-    public PolicyEndpoint() {
+    public PolicyServlet() {
         super();
         // TODO Auto-generated constructor stub
     }
