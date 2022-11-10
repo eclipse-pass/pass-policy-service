@@ -24,7 +24,7 @@
   </licenses>
 
   <developers>
-     <developer>
+    <developer>
       <name>Jim Martino</name>
       <email>jrm@jhu.edu</email>
       <organization>The Sheridan Libraries, Johns Hopkins University</organization>
@@ -61,7 +61,28 @@
       <artifactId>javax.servlet-api</artifactId>
       <version>4.0.0</version>
       <scope>provided</scope>
-  </dependency>
+    </dependency>
+    <!-- <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-api</artifactId>
+      <version>5.4.1</version>
+      <scope>test</scope>
+    </dependency> -->
+    <!-- https://mvnrepository.com/artifact/junit/junit -->
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.13.2</version>
+      <scope>test</scope>
+    </dependency>
+
+    <!-- https://mvnrepository.com/artifact/org.mockito/mockito-core -->
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-core</artifactId>
+      <version>4.8.1</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
   <repositories>
@@ -75,6 +96,5 @@
     </repository>
   </repositories>
 
-  <build>
-  </build>
+  <build></build>
 </project>
