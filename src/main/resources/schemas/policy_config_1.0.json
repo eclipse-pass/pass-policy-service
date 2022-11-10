@@ -42,7 +42,10 @@
                         "type": "string",
                         "title": "policy origin",
                         "description": "Indicates whether this is a funder-originating policy, or an institution-originating",
-                        "enum": ["funder", "institution"]
+                        "enum": [
+                            "funder",
+                            "institution"
+                        ]
                     },
                     "repositories": {
                         "type": "array",
@@ -156,7 +159,9 @@
             "type": "object",
             "title": "Any Of",
             "description": "Evaluates to true when any of the conditions listed within evaluate to true (logical OR)",
-            "required": ["anyOf"],
+            "required": [
+                "anyOf"
+            ],
             "additionalProperties": false,
             "properties": {
                 "anyOf": {
@@ -171,7 +176,9 @@
             "type": "object",
             "title": "None Of",
             "description": "Evaluates to true when none the conditions listed within evaluate to true",
-            "required": ["noneOf"],
+            "required": [
+                "noneOf"
+            ],
             "additionalProperties": false,
             "properties": {
                 "noneOf": {

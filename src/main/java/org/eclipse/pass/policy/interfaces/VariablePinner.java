@@ -4,7 +4,9 @@ import org.eclipse.pass.policy.rules.Variable;
 
 /**
  * Represents VariablePinner Interface
- * VariablePinner is a VariableResolver that can pin variables to specific values
+ * VariablePinner is a VariableResolver that can pin variables to specific
+ * values
+ * 
  * @author David McIntyre
  */
 public interface VariablePinner {
