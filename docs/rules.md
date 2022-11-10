@@ -59,7 +59,7 @@ In this example:
 
 * All policies for funders of grants associated with the submission (direct or primary) will be included
   * As far as repositories are concerned, all repositories listed under of a role will be grouped into a "one-of" bucket.   For example, if `${policy.repositories.id}` expands to two repositories (by way of a policy linking to two repositories), then both repositories are in the same one-of bucket.  The policy service will be be smart enough to promote one-of groups containing only a single item to the required list, or demoting repositories in a one-of bucker to optional if all any other repository in the one-of bucket is required by a different policy. The jScholarship policy will be added only for users for whom the request `Eppn` header contains the substring `@johnshopkins.edu`.  Effectively, this means everybody from JHU will get this policy added.
-  * As far as its repository is concerned, it is required by default, but becomes optional if any other repository is required.  
+  * As far as its repository is concerned, it is required by default, but becomes optional if any other repository is required.
 
 The top-level fields in the DSL are:
 
@@ -70,7 +70,7 @@ Policy inclusion rules are JSON objects containing the following fields:
 
 * `description`:  A human readable description of the rule.  Optional.
 * `policy-id`:  a string containing a a single policy URI, or a variable substitution resulting in one or more policy URIs
-  * In the case of a variable substitution resulting in many URIs, it is equivalent to creating multiple policy rules, each one containing a single policy-id from that list.  
+  * In the case of a variable substitution resulting in many URIs, it is equivalent to creating multiple policy rules, each one containing a single policy-id from that list.
 repositories:  contains a list of repository description JSON objects, specifying which repositories satisfy the given policy.
 * `condition`:  Optional.  JSON object describing a condition where the policy is included only if the condition evaluates to true.  If this field is not present, it is presumed that inclusion of the policy is unconditional.  See the schema for more details, but conditions include:
   * `equals`: true if two strings are equal
@@ -86,7 +86,7 @@ Repositories are JSON objects with the following fields:
 
 ## Variable substitution
 
-Any key or value of the form `${variable}` is a variable.  
+Any key or value of the form `${variable}` is a variable.
 
 At time of rule evaluation, the following variables are available:
 
@@ -118,4 +118,3 @@ In the case of policy rules, where a `policy-id` is a list of URIs, the variable
 ```
 
 In this case for each matching policy, the value of `${submission.grants.primaryFunder.policy}` is fixed inside the repositories block.  That is to say, submission is the given submission object, (as it always is), `${submission.grants}` is the single grant object used in producing the `${submission.grants.primaryFunder.policy}` value for this particular policy, etc.
-

@@ -7,13 +7,14 @@ import java.util.Map;
 /**
  * Represents the Context object
  * Context establishes a rule evaluation/resolution context
+ * 
  * @author David McIntyre
  */
 public class Context {
 
     private String submissionURI;
     private Map headers;
-    //private PassEntityFetcher passClient;
+    // private PassEntityFetcher passClient;
     private Map values;
 
 }
