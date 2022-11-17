@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
-
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -53,8 +52,9 @@ public class PolicyServlet extends HttpServlet {
         String submission = request.getParameter("submission");
 
         // handle empty request submission error
-        if (submission == null)
+        if (submission == null) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "No submission query param provided");
+        }
 
         // retieve map of headers and values from request
         Enumeration<String> headerNames = request.getHeaderNames();
@@ -85,10 +85,11 @@ public class PolicyServlet extends HttpServlet {
     public void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         // handle wrong request content-type
-        if (request.getHeader("Content-Type") != "application/x-www-form-urlencoded")
+        if (request.getHeader("Content-Type") != "application/x-www-form-urlencoded") {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST,
                     "Expected media type: application/x-www-form-urlencoded but got "
                             + request.getHeader("Content-Type"));
+        }
 
         response.getWriter().append("Served at: ").append(request.getContextPath());
     }

@@ -48,8 +48,9 @@ public class RepositoriesServlet extends HttpServlet {
         String submission = request.getParameter("submission");
 
         // handle empty request submission error
-        if (submission == null)
+        if (submission == null) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "No submission query param provided");
+        }
 
         // call to policy service
         try {
@@ -69,10 +70,11 @@ public class RepositoriesServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         // handle wrong request content-type
-        if (request.getHeader("Content-Type") != "application/x-www-form-urlencoded")
+        if (request.getHeader("Content-Type") != "application/x-www-form-urlencoded") {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST,
                     "Expected media type: application/x-www-form-urlencoded but got "
                             + request.getHeader("Content-Type"));
+        }
 
         response.getWriter().append("Served at: ").append(request.getContextPath());
     }
