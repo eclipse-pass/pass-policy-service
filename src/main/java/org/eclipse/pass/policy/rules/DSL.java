@@ -18,9 +18,11 @@ public class DSL implements PolicyResolver {
     private List<Policy> policies; // json:"policy-rules"
 
     /**
+     * DSL.resolve()
+     *
      * @param variables - the ruleset to be resolved
-     * @return Policy[] -
-     * @throws RuntimeException
+     * @return List<Policy> - the ist of resolved policies
+     * @throws RuntimeException - could not resolve policy rule
      */
     @Override
     public List<Policy> resolve(VariablePinner variables) throws RuntimeException {
