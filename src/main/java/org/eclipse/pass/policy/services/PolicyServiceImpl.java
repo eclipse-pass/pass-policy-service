@@ -21,8 +21,13 @@ public class PolicyServiceImpl implements PolicyService {
 
     PassClient passClient = PassClientFactory.getPassClient();
 
-    // Policy endpoint functions
-    // find applicable policies based on request context
+    /**
+     * PolicyService.findPolicies()
+     *
+     * @param submissionURI - PASS submissionURI
+     * @param headers       - request headers
+     * @return List<Policy> - List of policies relevant to submissionURI
+     */
     @Override
     public List<Policy> findPolicies(String submissionURI, Map headers) {
         Context context = new Context(submissionURI, headers, passClient);
