@@ -6,6 +6,8 @@ import org.dataconservancy.pass.client.PassClient;
 import org.dataconservancy.pass.client.PassClientFactory;
 import org.dataconservancy.pass.model.Policy;
 import org.eclipse.pass.policy.interfaces.PolicyService;
+import org.eclipse.pass.policy.rules.Context;
+import org.eclipse.pass.policy.rules.DSL;
 
 /**
  * Represents PolicyService object.
@@ -22,7 +24,9 @@ public class PolicyServiceImpl implements PolicyService {
     // find applicable policies based on request context
     @Override
     public Policy[] findPolicies(String submissionURI, Map headers) {
-        return null;
+        Context context = new Context(submissionURI, headers, passClient);
+        DSL dsl = new DSL();
+        return dsl.resolve(context);
     }
 
     // public void sendPolicies() {
