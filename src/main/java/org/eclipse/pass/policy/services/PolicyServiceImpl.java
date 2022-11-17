@@ -1,5 +1,6 @@
 package org.eclipse.pass.policy.services;
 
+import java.util.List;
 import java.util.Map;
 
 import org.dataconservancy.pass.client.PassClient;
@@ -23,7 +24,7 @@ public class PolicyServiceImpl implements PolicyService {
     // Policy endpoint functions
     // find applicable policies based on request context
     @Override
-    public Policy[] findPolicies(String submissionURI, Map headers) {
+    public List<Policy> findPolicies(String submissionURI, Map headers) {
         Context context = new Context(submissionURI, headers, passClient);
         DSL dsl = new DSL();
         return dsl.resolve(context);
