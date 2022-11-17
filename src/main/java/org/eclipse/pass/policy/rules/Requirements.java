@@ -1,12 +1,12 @@
 package org.eclipse.pass.policy.rules;
 
-import org.eclipse.pass.policy.components.Repository;
+import org.dataconservancy.pass.model.Repository;
 
 /**
  * Represents the Requirements object
  * Requirements encapsulates deposit requirements by sorting repositories into:
  * "required", "oneOf", and "optional" buckets
- * 
+ *
  * @author David McIntyre
  */
 public class Requirements {
