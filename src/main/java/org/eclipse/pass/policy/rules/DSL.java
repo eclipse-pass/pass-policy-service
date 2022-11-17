@@ -1,11 +1,11 @@
 package org.eclipse.pass.policy.rules;
 
-import org.eclipse.pass.policy.components.Policy;
+import org.dataconservancy.pass.model.Policy;
 
 /**
  * Represents the DSL object
  * DSL encapsulates to a policy rules document
- * 
+ *
  * @author David McIntyre
  */
 public class DSL {
