@@ -1,5 +1,6 @@
 package org.eclipse.pass.policy.interfaces;
 
+import java.util.List;
 import java.util.Map;
 
 import org.dataconservancy.pass.model.Policy;
@@ -11,5 +12,5 @@ import org.dataconservancy.pass.model.Policy;
  * @author David McIntyre
  */
 public interface PolicyService {
-    public Policy[] findPolicies(String submissionURI, Map headers);
+    public List<Policy> findPolicies(String submissionURI, Map headers);
 }

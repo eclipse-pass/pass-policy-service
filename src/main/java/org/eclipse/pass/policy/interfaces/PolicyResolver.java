@@ -1,5 +1,7 @@
 package org.eclipse.pass.policy.interfaces;
 
+import java.util.List;
+
 import org.dataconservancy.pass.model.Policy;
 
 /**
@@ -11,6 +13,5 @@ import org.dataconservancy.pass.model.Policy;
  */
 public interface PolicyResolver {
 
-    // public ([]Policy, error) Resolve(VariablePinner variables);
-    public Policy[] resolve(VariablePinner variables);
+    public List<Policy> resolve(VariablePinner variables) throws RuntimeException;
 }

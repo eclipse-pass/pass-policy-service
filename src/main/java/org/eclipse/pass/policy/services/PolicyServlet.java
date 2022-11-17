@@ -3,6 +3,7 @@ package org.eclipse.pass.policy.services;
 import java.io.IOException;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -69,7 +70,7 @@ public class PolicyServlet extends HttpServlet {
 
         // call to policy service
         try {
-            Policy policies[] = policyService.findPolicies(submission, headers);
+            List<Policy> policies = policyService.findPolicies(submission, headers);
         } catch (Exception e) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
         }
