@@ -35,8 +35,10 @@ public class PolicyRules {
         // If the policy ID is a variable, we need to resolve/expand it. If the result
         // is a list of IDs, we return a list of policies, each one with an ID from the
         // list.
-        if (true == false) {
-            // need to implement variable class / functions
+        if (Variable.isVariable(policy.getId())) {
+
+            // resolve policy ID/s
+            List<Policy> resolvedIDs = new ArrayList<Policy>();
         } else {
 
             // Individual policy. Resolve the repositories section, and filter by condition
@@ -45,6 +47,7 @@ public class PolicyRules {
                 // need to figure out java implementation of interfaces implementing interfaces
                 // in golang
                 resolvedRepos.addAll(resolveRepositories(policy, variables));
+
             } catch (Exception e) {
                 throw new RuntimeException("Could not resolve repositories in policy " + policy.getId());
             }
