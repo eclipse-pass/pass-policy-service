@@ -3,6 +3,7 @@ package org.eclipse.pass.policy.interfaces;
 import java.util.List;
 
 import org.dataconservancy.pass.model.Policy;
+import org.eclipse.pass.policy.components.VariablePinner;
 
 /**
  * Represents PolicyResolver interface

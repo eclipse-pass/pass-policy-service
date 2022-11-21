@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.dataconservancy.pass.model.Policy;
 import org.dataconservancy.pass.model.Repository;
-import org.eclipse.pass.policy.interfaces.VariablePinner;
+import org.eclipse.pass.policy.components.VariablePinner;
 import org.eclipse.pass.policy.interfaces.VariableResolver;
 
 /**
@@ -16,6 +16,10 @@ import org.eclipse.pass.policy.interfaces.VariableResolver;
  * @author David McIntyre
  */
 public class PolicyRules {
+
+    private Policy policy;
+    private List<Repository> repositories;
+    private List<Condition> conditions;
 
     /**
      * Resolve interpolates any variables in a policy and resolves against a ruleset
@@ -32,7 +36,7 @@ public class PolicyRules {
         // is a list of IDs, we return a list of policies, each one with an ID from the
         // list.
         if (true == false) {
-            // need to implement variable methods
+            // need to implement variable class / functions
         } else {
 
             // Individual policy. Resolve the repositories section, and filter by condition
@@ -40,7 +44,7 @@ public class PolicyRules {
             try {
                 // need to figure out java implementation of interfaces implementing interfaces
                 // in golang
-                // resolvedRepos.add(resolveRepositories(policy, variables))
+                resolvedRepos.addAll(resolveRepositories(policy, variables));
             } catch (Exception e) {
                 throw new RuntimeException("Could not resolve repositories in policy " + policy.getId());
             }

@@ -1,9 +1,10 @@
 package org.eclipse.pass.policy.rules;
 
+import java.util.List;
 import java.util.Map;
 
 import org.dataconservancy.pass.client.PassClient;
-import org.eclipse.pass.policy.interfaces.VariablePinner;
+import org.eclipse.pass.policy.components.VariablePinner;
 
 /**
  * Represents the Context object
@@ -11,7 +12,7 @@ import org.eclipse.pass.policy.interfaces.VariablePinner;
  *
  * @author David McIntyre
  */
-public class Context implements VariablePinner {
+public class Context extends VariablePinner {
 
     private String submissionURI;
     private Map headers;
@@ -25,7 +26,13 @@ public class Context implements VariablePinner {
     }
 
     @Override
-    public VariablePinner Pin(Variable variable, String string) {
+    public List<String> resolve(String varString) throws Exception {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public VariablePinner pin(Variable variable, String value) {
         // TODO Auto-generated method stub
         return null;
     }
