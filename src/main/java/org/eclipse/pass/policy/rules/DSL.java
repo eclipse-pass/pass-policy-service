@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.dataconservancy.pass.model.Policy;
+import org.eclipse.pass.policy.components.VariablePinner;
 import org.eclipse.pass.policy.interfaces.PolicyResolver;
-import org.eclipse.pass.policy.interfaces.VariablePinner;
 
 /**
  * Represents the DSL object
@@ -42,5 +42,4 @@ public class DSL implements PolicyResolver {
         }
         return null;
     }
-
 }
