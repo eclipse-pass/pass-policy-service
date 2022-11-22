@@ -12,5 +12,5 @@ import org.dataconservancy.pass.model.Policy;
  * @author David McIntyre
  */
 public interface PolicyService {
-    public List<Policy> findPolicies(String submissionURI, Map headers);
+    public List<Policy> findPolicies(String submissionURI, Map headers) throws Exception;
 }

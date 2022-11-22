@@ -1,6 +1,8 @@
 package org.eclipse.pass.policy.rules;
 
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.eclipse.pass.policy.components.VariablePinner;
@@ -18,14 +20,19 @@ public class Variable extends VariablePinner {
     private String segmentName;
     private String fullName;
 
-    @Override
-    public List<String> resolve(String varString) throws Exception {
-        // TODO Auto-generated method stub
-        return null;
+    public Variable(String fullName) {
+        this.fullName = fullName;
     }
 
     @Override
-    public VariablePinner pin(Variable variable, String value) {
+    public List<URI> resolve(URI varString) throws Exception {
+        List<URI> resolvedVar = new ArrayList<URI>();
+        resolvedVar.add(varString);
+        return resolvedVar;
+    }
+
+    @Override
+    public VariablePinner pin(Object variable, Object value) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -39,7 +46,18 @@ public class Variable extends VariablePinner {
      */
     public static Boolean isVariable(URI text) {
         String string = text.toString();
-        return string.startsWith("${") && string.endsWith("}");
+        Boolean isVariable = string.startsWith("${") && string.endsWith("}");
+        return isVariable;
+    }
+
+    public static Variable toVariable(URI text) {
+        // ensure that text is a proper variable
+        if (!isVariable(text)) {
+            return null;
+        }
+        // need to trim string based on ${} chars
+        Variable variable = new Variable(text.toString());
+        return variable;
     }
 
 }

@@ -1,5 +1,6 @@
 package org.eclipse.pass.policy.interfaces;
 
+import java.net.URI;
 import java.util.List;
 
 /**
@@ -11,7 +12,6 @@ import java.util.List;
  */
 public interface VariableResolver {
 
-    // public (String[], error) Resolve(String varString);
-    public List<String> resolve(String varString) throws Exception;
+    public List<URI> resolve(URI varString) throws Exception;
 
 }

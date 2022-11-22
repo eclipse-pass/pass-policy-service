@@ -15,31 +15,38 @@ import org.eclipse.pass.policy.interfaces.PolicyResolver;
  */
 public class DSL implements PolicyResolver {
 
-    private PolicyRules resolver;
+    private PolicyRules policyRules;
 
     private String schema; // json:"$schema"
     private List<Policy> policies; // json:"policy-rules"
 
     /**
      * DSL.resolve()
+     * Resolves a list of applicable Policies using a provided ruleset against a
+     * database of policies that are instantiated at runtime.
      *
      * @param variables - the ruleset to be resolved against
      * @return List<Policy> - the List of resolved policies
-     * @throws RuntimeException - could not resolve policy rule
+     * @throws Exception
      */
     @Override
-    public List<Policy> resolve(VariablePinner variables) throws RuntimeException {
+    public List<Policy> resolve(VariablePinner variables) throws Exception {
         List<Policy> resolvedPolicies = new ArrayList<Policy>();
 
         for (Policy policy : policies) {
             try {
-                if (resolver.resolve(policy, variables) != null) {
-                    resolvedPolicies.add(policy);
+                List<Policy> resolved = policyRules.resolve(policy, variables);
+
+                // If a resolved policy or policies exist, append to final list
+                if (resolved.size() > 0) {
+                    resolvedPolicies.addAll(resolved);
                 }
+
             } catch (Exception e) {
-                throw new RuntimeException("Could not resolve policy rule");
+                throw new Exception("Could not resolve policy rule", e);
             }
         }
-        return null;
+
+        return policyRules.uniquePolicies(resolvedPolicies);
     }
 }

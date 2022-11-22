@@ -1,7 +1,9 @@
 package org.eclipse.pass.policy.rules;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.dataconservancy.pass.model.Policy;
 import org.dataconservancy.pass.model.Repository;
@@ -27,8 +29,9 @@ public class PolicyRules {
      *
      * @param variables - the ruleset to be resolved against
      * @return List<Policy> - the List of resolved Policies
+     * @throws Exception -
      */
-    public List<Policy> resolve(Policy policy, VariablePinner variables) {
+    public List<Policy> resolve(Policy policy, VariablePinner variables) throws Exception {
         List<Policy> resolvedPolicies = new ArrayList<Policy>();
         List<Repository> resolvedRepos = new ArrayList<Repository>();
 
@@ -38,18 +41,33 @@ public class PolicyRules {
         if (Variable.isVariable(policy.getId())) {
 
             // resolve policy ID/s
-            List<Policy> resolvedIDs = new ArrayList<Policy>();
+            List<URI> resolvedIDs = new ArrayList<URI>();
+            try {
+                resolvedIDs.addAll(variables.resolve(policy.getId()));
+
+                for (URI id : resolvedIDs) {
+                    Policy resolved = new Policy();
+                    resolved.setTitle(policy.getTitle());
+                    resolved.setDescription(policy.getDescription());
+                    resolved.setPolicyUrl(policy.getPolicyUrl());
+                    resolved.setRepositories(policy.getRepositories());
+                    resolved.setInstitution(policy.getInstitution());
+                    resolved.setId(id);
+                    resolve(resolved, variables.pin(policy.getId(), id));
+                }
+            } catch (Exception e) {
+                throw new Exception("Could not resolve property ID " + policy.getId().toString(), e);
+            }
+
         } else {
 
             // Individual policy. Resolve the repositories section, and filter by condition
             // to see if it is applicable
             try {
-                // need to figure out java implementation of interfaces implementing interfaces
-                // in golang
                 resolvedRepos.addAll(resolveRepositories(policy, variables));
 
             } catch (Exception e) {
-                throw new RuntimeException("Could not resolve repositories in policy " + policy.getId());
+                throw new Exception("Could not resolve repositories in policy " + policy.getId());
             }
         }
         return null;
@@ -57,5 +75,23 @@ public class PolicyRules {
 
     public List<Repository> resolveRepositories(Policy policy, VariableResolver variables) {
         return null;
+    }
+
+    /**
+     * uniquePolicies()
+     * Removes duplicates from a given list of Policies and returns the unique List.
+     *
+     * @param policies - the list of policies with potential duplicates
+     * @return List<Policy> - the list of unique policies
+     */
+    public List<Policy> uniquePolicies(List<Policy> policies) {
+
+        if (policies.size() < 2) {
+            return policies;
+        }
+
+        List<Policy> uniquePolicies = policies.stream().distinct().collect(Collectors.toList());
+
+        return uniquePolicies;
     }
 }
