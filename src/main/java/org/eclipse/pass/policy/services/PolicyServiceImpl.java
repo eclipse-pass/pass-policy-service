@@ -27,12 +27,17 @@ public class PolicyServiceImpl implements PolicyService {
      * @param submissionURI - PASS submissionURI
      * @param headers       - request headers
      * @return List<Policy> - List of policies relevant to submissionURI
+     * @throws Exception
      */
     @Override
-    public List<Policy> findPolicies(String submissionURI, Map headers) {
+    public List<Policy> findPolicies(String submissionURI, Map headers) throws Exception {
         Context context = new Context(submissionURI, headers, passClient);
         DSL dsl = new DSL();
-        return dsl.resolve(context);
+        try {
+            return dsl.resolve(context);
+        } catch (Exception e) {
+            throw new Exception("Could not resolve policy rule", e);
+        }
     }
 
     // public void sendPolicies() {
