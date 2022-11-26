@@ -60,4 +60,58 @@ public class Variable extends VariablePinner {
         return variable;
     }
 
+    /**
+     * getSegment()
+     *
+     * @return String
+     */
+    public String getSegment() {
+        return this.segment;
+    }
+
+    /**
+     * setSegment()
+     *
+     * @param segment
+     */
+    public void setSegment(String segment) {
+        this.segment = segment;
+    }
+
+    /**
+     * getSegmentName()
+     *
+     * @return String
+     */
+    public String getSegmentName() {
+        return this.segmentName;
+    }
+
+    /**
+     * setSegmentName()
+     *
+     * @param segmentName
+     */
+    public void setSegmentName(String segmentName) {
+        this.segmentName = segmentName;
+    }
+
+    /**
+     * getFullName()
+     *
+     * @return String
+     */
+    public String getFullName() {
+        return this.fullName;
+    }
+
+    /**
+     * setFullName()
+     *
+     * @param fullName
+     */
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
+    }
+
 }

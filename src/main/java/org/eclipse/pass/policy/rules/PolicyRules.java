@@ -54,6 +54,8 @@ public class PolicyRules {
                     resolved.setInstitution(policy.getInstitution());
                     resolved.setId(id);
                     resolve(resolved, variables.pin(policy.getId(), id));
+
+                    resolvedPolicies.add(resolved);
                 }
             } catch (Exception e) {
                 throw new Exception("Could not resolve property ID " + policy.getId().toString(), e);
@@ -67,7 +69,7 @@ public class PolicyRules {
                 resolvedRepos.addAll(resolveRepositories(policy, variables));
 
             } catch (Exception e) {
-                throw new Exception("Could not resolve repositories in policy " + policy.getId());
+                throw new Exception("Could not resolve repositories in policy " + policy.getId(), e);
             }
         }
         return null;
