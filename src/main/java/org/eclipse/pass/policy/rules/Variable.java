@@ -2,7 +2,6 @@ package org.eclipse.pass.policy.rules;
 
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import org.eclipse.pass.policy.components.VariablePinner;
