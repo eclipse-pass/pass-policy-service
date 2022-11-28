@@ -8,7 +8,6 @@ import java.util.stream.Collectors;
 import org.dataconservancy.pass.model.Policy;
 import org.dataconservancy.pass.model.Repository;
 import org.eclipse.pass.policy.components.VariablePinner;
-import org.eclipse.pass.policy.interfaces.VariableResolver;
 
 /**
  * Represents the PolicyRules object
@@ -82,12 +81,23 @@ public class PolicyRules {
             // to see if it is applicable
             try {
                 resolvedRepos.addAll(resolveRepositories(policy, variables));
+                // policy.setRepositories(resolvedRepos);
 
+                try {
+                    Boolean valid = applyConditions(policy, variables);
+
+                    if (valid) {
+                        resolvedPolicies.add(policy);
+                    }
+                } catch (Exception e) {
+                    throw new Exception("Error applying conditions to policy " + policy.getId().toString());
+                }
             } catch (Exception e) {
                 throw new Exception("Could not resolve repositories in policy " + policy.getId().toString(), e);
             }
         }
-        return null;
+
+        return uniquePolicies(resolvedPolicies);
     }
 
     public List<Repository> resolveRepositories(Policy policy, VariablePinner variables) throws Exception {
@@ -102,6 +112,10 @@ public class PolicyRules {
         } catch (Exception e) {
             throw new Exception("Could not resolve repositories for " + policy.getId().toString(), e);
         }
+        return null;
+    }
+
+    private Boolean applyConditions(Policy policy2, VariablePinner variables) {
         return null;
     }
 
