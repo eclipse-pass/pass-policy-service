@@ -1,12 +1,18 @@
 package org.eclipse.pass.policy.services;
 
 import java.io.IOException;
+import java.util.Enumeration;
+import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.dataconservancy.pass.model.Repository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,9 +58,20 @@ public class RepositoriesServlet extends HttpServlet {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "No submission query param provided");
         }
 
+        // retieve map of headers and values from request
+        Enumeration<String> headerNames = request.getHeaderNames();
+        Map<String, String> headers = new HashMap<String, String>();
+        if (headerNames != null) {
+            while (headerNames.hasMoreElements()) {
+                String key = (String) headerNames.nextElement();
+                String value = request.getHeader(key);
+                headers.put(key, value);
+            }
+        }
+
         // call to policy service
         try {
-
+            List<Repository> repositories = policyService.findRepositories(submission, headers);
         } catch (Exception e) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
         }
