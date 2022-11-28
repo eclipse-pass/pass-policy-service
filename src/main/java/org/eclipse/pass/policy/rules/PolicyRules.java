@@ -19,6 +19,8 @@ import org.eclipse.pass.policy.interfaces.VariableResolver;
  */
 public class PolicyRules {
 
+    private RepositoryRules repositoryRules;
+
     private Policy policy;
     private List<Repository> repositories;
     private List<Condition> conditions;
@@ -45,17 +47,30 @@ public class PolicyRules {
             try {
                 resolvedIDs.addAll(variables.resolve(policy.getId()));
 
-                for (URI id : resolvedIDs) {
-                    Policy resolved = new Policy();
-                    resolved.setTitle(policy.getTitle());
-                    resolved.setDescription(policy.getDescription());
-                    resolved.setPolicyUrl(policy.getPolicyUrl());
-                    resolved.setRepositories(policy.getRepositories());
-                    resolved.setInstitution(policy.getInstitution());
-                    resolved.setId(id);
-                    resolve(resolved, variables.pin(policy.getId(), id));
+                URI curID = resolvedIDs.get(0); // for exception handling
+                try {
 
-                    resolvedPolicies.add(resolved);
+                    for (URI id : resolvedIDs) {
+
+                        // Now that we have a concrete ID, resolve any other variables elsewhere in the
+                        // policy. Some of them may depend on knowing the ID we just found.
+                        //
+                        // We take a shortcut by pinning only the ID variable, meaning ${foo.bar.baz.id}
+                        // is pinned, but ${foo.bar} is not.
+                        curID = id; // for exception handling
+                        Policy resolved = new Policy();
+                        resolved.setTitle(policy.getTitle());
+                        resolved.setDescription(policy.getDescription());
+                        resolved.setPolicyUrl(policy.getPolicyUrl());
+                        resolved.setRepositories(policy.getRepositories());
+                        resolved.setInstitution(policy.getInstitution());
+                        resolved.setId(id);
+                        resolve(resolved, variables.pin(policy.getId(), id));
+
+                        resolvedPolicies.add(resolved);
+                    }
+                } catch (Exception e) {
+                    throw new Exception("Could not resolve policy rule for " + curID.toString());
                 }
             } catch (Exception e) {
                 throw new Exception("Could not resolve property ID " + policy.getId().toString(), e);
@@ -69,13 +84,24 @@ public class PolicyRules {
                 resolvedRepos.addAll(resolveRepositories(policy, variables));
 
             } catch (Exception e) {
-                throw new Exception("Could not resolve repositories in policy " + policy.getId(), e);
+                throw new Exception("Could not resolve repositories in policy " + policy.getId().toString(), e);
             }
         }
         return null;
     }
 
-    public List<Repository> resolveRepositories(Policy policy, VariableResolver variables) {
+    public List<Repository> resolveRepositories(Policy policy, VariablePinner variables) throws Exception {
+        List<Repository> resolvedRepos = new ArrayList<Repository>();
+
+        try {
+            for (URI repo : policy.getRepositories()) {
+                List<Repository> repos = repositoryRules.resolve(repo, variables);
+
+                resolvedRepos.addAll(repos);
+            }
+        } catch (Exception e) {
+            throw new Exception("Could not resolve repositories for " + policy.getId().toString(), e);
+        }
         return null;
     }
 
