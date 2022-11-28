@@ -65,10 +65,10 @@ public class Context extends VariablePinner {
             }
 
             Map<String, Object> pinnedValues = new HashMap<String, Object>();
-            Iterator it = headers.entrySet().iterator();
+            Iterator<Map<String, List<String>>> it = headers.entrySet().iterator();
 
             while (it.hasNext()) {
-                Map.Entry header = (Map.Entry) it.next();
+                Map.Entry<String, List<String>> header = (Map.Entry<String, List<String>>) it.next();
                 pinnedValues.put((String) header.getKey(), header.getValue());
             }
 
