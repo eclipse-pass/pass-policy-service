@@ -6,6 +6,7 @@ import java.util.Map;
 import org.dataconservancy.pass.client.PassClient;
 import org.dataconservancy.pass.client.PassClientFactory;
 import org.dataconservancy.pass.model.Policy;
+import org.dataconservancy.pass.model.Repository;
 import org.eclipse.pass.policy.interfaces.PolicyService;
 import org.eclipse.pass.policy.rules.Context;
 import org.eclipse.pass.policy.rules.DSL;
@@ -30,7 +31,7 @@ public class PolicyServiceImpl implements PolicyService {
      * @throws Exception
      */
     @Override
-    public List<Policy> findPolicies(String submissionURI, Map headers) throws Exception {
+    public List<Policy> findPolicies(String submissionURI, Map<String, String> headers) throws Exception {
         Context context = new Context(submissionURI, headers, passClient);
         DSL dsl = new DSL();
         try {
@@ -45,6 +46,10 @@ public class PolicyServiceImpl implements PolicyService {
     // }
 
     // Repositories endpoint functions
+    @Override
+    public List<Repository> findRepositories(String submissionURI, Map<String, String> headers) {
+        return null;
+    }
     // public void reconcileRepositories() {
 
     // }

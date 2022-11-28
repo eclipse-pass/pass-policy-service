@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.dataconservancy.pass.model.Policy;
+import org.dataconservancy.pass.model.Repository;
 
 /**
  * Represents PolicyService interface.
@@ -12,5 +13,7 @@ import org.dataconservancy.pass.model.Policy;
  * @author David McIntyre
  */
 public interface PolicyService {
-    public List<Policy> findPolicies(String submissionURI, Map headers) throws Exception;
+    public List<Policy> findPolicies(String submissionURI, Map<String, String> headers) throws Exception;
+
+    public List<Repository> findRepositories(String submissionURI, Map<String, String> headers) throws Exception;
 }
