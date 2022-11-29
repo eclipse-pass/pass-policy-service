@@ -116,6 +116,7 @@ public class PolicyRules {
     }
 
     private Boolean applyConditions(Policy policy2, VariablePinner variables) {
+
         return null;
     }
 
