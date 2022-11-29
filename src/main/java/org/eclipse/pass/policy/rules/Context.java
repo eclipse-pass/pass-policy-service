@@ -142,8 +142,9 @@ public class Context extends VariablePinner {
         Boolean hasKey = this.values.containsKey(segment.getSegmentName());
         Boolean hasValue = this.values.get(segment.getSegmentName()) != null;
         if ((hasKey && hasValue) || segment.prev().getSegmentName() == "") {
-
+            return null;
         }
+
         return null;
     }
 

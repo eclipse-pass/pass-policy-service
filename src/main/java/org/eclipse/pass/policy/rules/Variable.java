@@ -2,6 +2,7 @@ package org.eclipse.pass.policy.rules;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.pass.policy.components.VariablePinner;
@@ -80,6 +81,30 @@ public class Variable extends VariablePinner {
         // find trim left and trim prefix methods
         String remaining;
         return null;
+    }
+
+    /**
+     * prev()
+     * prev() returns a new Variable object representing a preview of the next
+     * segment
+     *
+     * @return Variable - the preview of the next segment
+     */
+    public Variable prev() {
+        Variable prev = new Variable(this.fullName);
+
+        if (this.segment == "") {
+            return prev;
+        }
+
+        // remove suffix (segment) from segmentName and trim resulting string of "."
+        prev.setSegmentName(this.segmentName.split(this.getSegment())[0].replaceAll(".", " "));
+
+        List<String> segments = new ArrayList<String>();
+        segments.addAll(Arrays.asList(prev.getSegmentName().split(".")));
+        prev.setSegment(segments.get(segments.size() - 1));
+
+        return prev;
     }
 
     /**
