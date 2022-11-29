@@ -18,9 +18,11 @@ public class Variable extends VariablePinner {
     private String segment;
     private String segmentName;
     private String fullName;
+    private Boolean shifted;
 
     public Variable(String fullName) {
         this.fullName = fullName;
+        this.shifted = false;
     }
 
     @Override
@@ -40,23 +42,44 @@ public class Variable extends VariablePinner {
      * isVariable()
      * Determines if a string is a variable (e.g. of the form '${foo.bar.baz}').
      *
-     * @param text - the string to be checked
+     * @param source - the string to be checked
      * @return Boolean - the text either is or isn't a variable
      */
-    public static Boolean isVariable(URI text) {
-        String string = text.toString();
+    public static Boolean isVariable(URI source) {
+        String string = source.toString();
         Boolean isVariable = string.startsWith("${") && string.endsWith("}");
         return isVariable;
     }
 
-    public static Variable toVariable(URI text) {
+    /**
+     * toVariable()
+     * Converts a valid URI to a variable for interpolation.
+     *
+     * @param source - the string to be checked
+     * @return Variable - the converted source for interpolation
+     */
+    public static Variable toVariable(URI source) {
         // ensure that text is a proper variable
-        if (!isVariable(text)) {
+        if (!isVariable(source)) {
             return null;
         }
         // need to trim string based on ${} chars
-        Variable variable = new Variable(text.toString());
+        Variable variable = new Variable(source.toString());
         return variable;
+    }
+
+    /**
+     * shift()
+     * shift() is used for producing a segment of a variable, e.g. shift() of
+     * ${foo.bar.baz} is ${foo}. shift() of that ${foo} is ${foo.bar}, and shift()
+     * of that ${foo.bar} is ${foo.bar.baz}.
+     *
+     * @return Variable - the newly shifted variable
+     */
+    public Variable shift() {
+        // find trim left and trim prefix methods
+        String remaining;
+        return null;
     }
 
     /**
@@ -113,4 +136,22 @@ public class Variable extends VariablePinner {
         this.fullName = fullName;
     }
 
+    /**
+     * isShifted()
+     * Check to see if a variable's full name has been shifted fully
+     *
+     * @return Boolean
+     */
+    public Boolean isShifted() {
+        return this.shifted;
+    }
+
+    /**
+     * setShifted()
+     *
+     * @param shifted
+     */
+    public void setShifted(Boolean shifted) {
+        this.shifted = shifted;
+    }
 }
