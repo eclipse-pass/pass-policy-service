@@ -106,8 +106,7 @@ public class Variable extends VariablePinner {
 
     /**
      * prev()
-     * prev() returns a new Variable object representing a preview of the next
-     * segment
+     * prev() returns a new Variable object representing the previous segment
      *
      * @return Variable - the preview of the next segment
      */
