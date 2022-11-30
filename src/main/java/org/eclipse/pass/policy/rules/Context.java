@@ -1,6 +1,7 @@
 package org.eclipse.pass.policy.rules;
 
 import java.net.URI;
+import java.security.cert.URICertStoreParameters;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -21,19 +22,19 @@ import org.eclipse.pass.policy.components.VariablePinner;
  */
 public class Context extends VariablePinner {
 
-    private String submissionURI;
-    private Map<String, String> headers;
+    private URI submissionURI;
+    private Map<String, Object> headers;
     private PassClient passClient;
     private Map<String, Object> values;
 
-    public Context(String submissionURI, Map<String, String> headers, PassClient passClient) {
+    public Context(URI submissionURI, Map<String, Object> headers, PassClient passClient) {
         this.submissionURI = submissionURI;
         this.headers = headers;
         this.passClient = passClient;
         this.values = new HashMap<String, Object>();
     }
 
-    public Context(String submissionURI, Map<String, String> headers, PassClient passClient,
+    public Context(URI submissionURI, Map<String, Object> headers, PassClient passClient,
             Map<String, Object> values) {
         this.submissionURI = submissionURI;
         this.headers = headers;
@@ -106,10 +107,10 @@ public class Context extends VariablePinner {
             }
 
             Map<String, Object> pinnedValues = new HashMap<String, Object>();
-            Iterator<Entry<String, String>> it = headers.entrySet().iterator();
+            Iterator<Entry<String, Object>> it = headers.entrySet().iterator();
 
             while (it.hasNext()) {
-                Entry<String, String> header = (Entry<String, String>) it.next();
+                Entry<String, Object> header = (Entry<String, Object>) it.next();
                 pinnedValues.put((String) header.getKey(), header.getValue());
             }
 
@@ -157,19 +158,21 @@ public class Context extends VariablePinner {
         } else if (prevValue instanceof ResolvedObject && prevValue instanceof List<?>) {
             // Case List<ResolvedObject>
             this.extractValues(segment, (List<ResolvedObject>) prevValue);
-        } else if (prevValue instanceof String && !(prevValue instanceof List<?>)) {
+        } else if (prevValue instanceof URI && !(prevValue instanceof List<?>)) {
             // Case String
-            // ${foo} is a String, or list of Strings. In order to find ${foo.bar}, see if
+            // ${foo} is a URI, or list of URIs. In order to find ${foo.bar}, see if
             // each foo is a stringified JSON blob, or an HTTP URI.
             // If it's a blob, parse to a JSON object and save it as a ResolvedObject to
             // ${foo.bar}.
             // If it's a URI, dereference it and, if its a JSON blob, parse it to a JSON
             // object and save a ResolvedObject containing both the URI and the resulting
             // blob to ${foo.bar}
+            this.resolveToObject(segment.prev(), (URI) prevValue);
 
             this.resolveSegment(segment);
-        } else if (prevValue instanceof String && prevValue instanceof List<?>) {
-            // Case List<String>
+        } else if (prevValue instanceof URI && prevValue instanceof List<?>) {
+            // Case List<URI>
+            this.resolveToObjects(segment.prev(), (List<URI>) prevValue);
 
             this.resolveSegment(segment);
         } else if (prevValue instanceof Object && prevValue instanceof List<?>) {
@@ -265,4 +268,11 @@ public class Context extends VariablePinner {
         this.values.put(v.getSegment(), vals); // this is the shortcut ${properties}, instead of ${x.y.properties}
     }
 
+    public void resolveToObject(Variable v, URI s) throws Exception {
+        ResolvedObject resolved = new ResolvedObject(s, new HashMap<String, Object>());
+    }
+
+    public void resolveToObjects(Variable v, List<URI> vals) {
+
+    }
 }

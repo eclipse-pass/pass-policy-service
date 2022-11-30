@@ -1,5 +1,6 @@
 package org.eclipse.pass.policy.services;
 
+import java.net.URI;
 import java.util.List;
 import java.util.Map;
 
@@ -31,7 +32,7 @@ public class PolicyServiceImpl implements PolicyService {
      * @throws Exception
      */
     @Override
-    public List<Policy> findPolicies(String submissionURI, Map<String, String> headers) throws Exception {
+    public List<Policy> findPolicies(URI submissionURI, Map<String, Object> headers) throws Exception {
         Context context = new Context(submissionURI, headers, passClient);
         DSL dsl = new DSL();
         try {
@@ -47,7 +48,7 @@ public class PolicyServiceImpl implements PolicyService {
 
     // Repositories endpoint functions
     @Override
-    public List<Repository> findRepositories(String submissionURI, Map<String, String> headers) {
+    public List<Repository> findRepositories(URI submissionURI, Map<String, Object> headers) {
         return null;
     }
     // public void reconcileRepositories() {

@@ -1,5 +1,6 @@
 package org.eclipse.pass.policy.interfaces;
 
+import java.net.URI;
 import java.util.List;
 import java.util.Map;
 
@@ -13,7 +14,7 @@ import org.dataconservancy.pass.model.Repository;
  * @author David McIntyre
  */
 public interface PolicyService {
-    public List<Policy> findPolicies(String submissionURI, Map<String, String> headers) throws Exception;
+    public List<Policy> findPolicies(URI submissionURI, Map<String, Object> headers) throws Exception;
 
-    public List<Repository> findRepositories(String submissionURI, Map<String, String> headers) throws Exception;
+    public List<Repository> findRepositories(URI submissionURI, Map<String, Object> headers) throws Exception;
 }
