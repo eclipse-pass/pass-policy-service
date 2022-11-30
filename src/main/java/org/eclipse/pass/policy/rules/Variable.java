@@ -78,9 +78,30 @@ public class Variable extends VariablePinner {
      * @return Variable - the newly shifted variable
      */
     public Variable shift() {
-        // find trim left and trim prefix methods
-        String remaining;
-        return null;
+        this.shifted = false;
+
+        // remove prefix (segmentName) from fullName and left trim resulting string of
+        // leading "."
+        String remaining = this.fullName.split(this.segmentName, 2)[1].replaceAll("^.", " ");
+
+        // no more variable segments
+        if (remaining.equals("")) {
+            return this;
+        }
+
+        Variable shifted = new Variable(this.fullName);
+
+        if (this.segment.equals("")) {
+            shifted.setSegment(this.fullName.split(".")[0]);
+            shifted.setSegmentName(shifted.getSegmentName());
+        } else {
+            String[] segments = remaining.split(".");
+            shifted.setSegment(segments[0]);
+            shifted.setSegmentName(String.join(".", this.segmentName, segments[0]));
+        }
+
+        this.shifted = true;
+        return shifted;
     }
 
     /**
@@ -93,12 +114,12 @@ public class Variable extends VariablePinner {
     public Variable prev() {
         Variable prev = new Variable(this.fullName);
 
-        if (this.segment == "") {
+        if (this.segment.equals("")) {
             return prev;
         }
 
         // remove suffix (segment) from segmentName and trim resulting string of "."
-        prev.setSegmentName(this.segmentName.split(this.getSegment())[0].replaceAll(".", " "));
+        prev.setSegmentName(this.segmentName.split(this.segment, 2)[0].replaceAll(".", " "));
 
         List<String> segments = new ArrayList<String>();
         segments.addAll(Arrays.asList(prev.getSegmentName().split(".")));
