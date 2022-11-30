@@ -1,6 +1,7 @@
 package org.eclipse.pass.policy.services;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
@@ -50,7 +51,7 @@ public class PolicyServlet extends HttpServlet {
         LOG.debug("Context path: " + request.getContextPath() + "; query string " + request.getQueryString());
 
         // retrieve submission URI from request
-        String submission = request.getParameter("submission");
+        URI submission = URI.create(request.getParameter("submission"));
 
         // handle empty request submission error
         if (submission == null) {
@@ -60,7 +61,7 @@ public class PolicyServlet extends HttpServlet {
 
         // retieve map of headers and values from request
         Enumeration<String> headerNames = request.getHeaderNames();
-        Map<String, String> headers = new HashMap<String, String>();
+        Map<String, Object> headers = new HashMap<String, Object>();
         if (headerNames != null) {
             while (headerNames.hasMoreElements()) {
                 String key = (String) headerNames.nextElement();

@@ -12,9 +12,9 @@ import java.util.Map;
 public class ResolvedObject {
 
     private URI source;
-    private Map<String, String> object;
+    private Map<String, Object> object;
 
-    public ResolvedObject(URI source, Map<String, String> object) {
+    public ResolvedObject(URI source, Map<String, Object> object) {
         this.source = source;
         this.object = object;
     }
@@ -42,7 +42,7 @@ public class ResolvedObject {
      *
      * @return Map<String, String>
      */
-    public Map<String, String> getObject() {
+    public Map<String, Object> getObject() {
         if (this.object.size() > 0) {
             return this.object;
         } else {
@@ -55,7 +55,7 @@ public class ResolvedObject {
      *
      * @param object
      */
-    public void setObject(Map<String, String> object) {
+    public void setObject(Map<String, Object> object) {
         this.object = object;
     }
 
