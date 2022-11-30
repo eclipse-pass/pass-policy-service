@@ -155,50 +155,39 @@ public class Context extends VariablePinner {
             // Case ResolvedObject
             this.extractValue(segment, (ResolvedObject) prevValue);
         } else if (prevValue instanceof ResolvedObject && prevValue instanceof List<?>) {
-            // Case []ResolvedObject
+            // Case List<ResolvedObject>
             this.extractValues(segment, (List<ResolvedObject>) prevValue);
-        }
-
-        // ${foo} is a String, or list of Strings. In order to find ${foo.bar}, see if
-        // each foo is a stringified JSON blob, or an HTTP URI.
-        // If it's a blob, parse to a JSON object and save it as a ResolvedObject to
-        // ${foo.bar}.
-        // If it's a URI, dereference it and, if its a JSON blob, parse it to a JSON
-        // object and save a ResolvedObject containing both the URI and the resulting
-        // blob to ${foo.bar}
-        else if (prevValue instanceof String && !(prevValue instanceof List<?>)) {
+        } else if (prevValue instanceof String && !(prevValue instanceof List<?>)) {
             // Case String
-            // if it can't be resolved to an object, throw an error
+            // ${foo} is a String, or list of Strings. In order to find ${foo.bar}, see if
+            // each foo is a stringified JSON blob, or an HTTP URI.
+            // If it's a blob, parse to a JSON object and save it as a ResolvedObject to
+            // ${foo.bar}.
+            // If it's a URI, dereference it and, if its a JSON blob, parse it to a JSON
+            // object and save a ResolvedObject containing both the URI and the resulting
+            // blob to ${foo.bar}
 
             this.resolveSegment(segment);
-
         } else if (prevValue instanceof String && prevValue instanceof List<?>) {
-            // Case []String
-            // if it cant be resolved to objects, throw an error
+            // Case List<String>
 
             this.resolveSegment(segment);
-        }
-
-        // ${foo} is a list of some sort, but we don't know the type of the items. If
-        // they are URIs, dereference the URIs.
-        // If the Result is a JSON blob, parse it and look up the value of the key 'bar'
-        // in each blob. Save to ${foo.bar}
-        else if (prevValue instanceof Object && prevValue instanceof List<?>) {
+        } else if (prevValue instanceof Object && prevValue instanceof List<?>) {
             // Case Object
+            // ${foo} is a list of some sort, but we don't know the type of the items. If
+            // they are URIs, dereference the URIs.
+            // If the Result is a JSON blob, parse it and look up the value of the key 'bar'
+            // in each blob. Save to ${foo.bar}
             // error checking
 
             this.resolveSegment(segment);
-        }
-
-        // ${bar} has no value, so of course ${foo.bar} has no value either
-        else if (prevValue == null) {
+        } else if (prevValue == null) {
             // Case Null
+            // ${bar} has no value, so of course ${foo.bar} has no value either
             this.values.put(segment.getSegmentName(), new ArrayList<String>());
-        }
-
-        // ${bar} is some unexpected type.
-        else {
+        } else {
             // Case Default
+            // ${bar} is some unexpected type.
             // do something
         }
 
@@ -209,32 +198,71 @@ public class Context extends VariablePinner {
      * extractValue()
      * Set ${foo.bar} to foo[bar]
      *
-     * @param v
-     * @param resolved
+     * @param v        - the variable to extract
+     * @param resolved - the resolved Object
+     * @throws Exception
      */
-    public void extractValue(Variable v, ResolvedObject resolved) {
-        String val = resolved.getObject().get(v.getSegment());
+    public void extractValue(Variable v, ResolvedObject resolved) throws Exception {
+        Object val = resolved.getObject().get(v.getSegment());
 
         if (val == null) {
             this.values.put(v.getSegmentName(), new ArrayList<String>());
             this.values.put(v.getSegment(), new ArrayList<String>());
         }
 
+        if (!(val instanceof String) || val instanceof List<?>) {
+            throw new Exception(v.getSegmentName() + " is " + val.getClass().getName() + ", or a list, not a String");
+        }
+
         List<String> valList = new ArrayList<String>();
-        valList.add(val);
+        valList.add((String) val);
+
         this.values.put(v.getSegmentName(), valList);
-        this.values.put(v.getSegment(), valList);
+        this.values.put(v.getSegment(), valList); // this is the shortcut ${properties}, instead of ${x.y.properties}
     }
 
     /**
      * extractValues()
      * Append foo[bar] to ${foo.bar} for each foo
      *
-     * @param v
-     * @param resolved
+     * @param v        - the variable to extract
+     * @param resolved - the resolved Object
+     * @throws Exception - Object does not contain a list of Strings
      */
-    public void extractValues(Variable v, List<ResolvedObject> resolved) {
+    public void extractValues(Variable v, List<ResolvedObject> resolvedList) throws Exception {
+        List<String> vals = new ArrayList<String>();
 
+        for (ResolvedObject resolved : resolvedList) {
+            if (resolved.getObject().containsKey(v.getSegment())
+                    && resolved.getObject().get(v.getSegment()) != null) {
+
+                Object typedVal = resolved.getObject().get(v.getSegment());
+
+                if (typedVal instanceof String && !(typedVal instanceof List<?>)) {
+                    // Case String
+                    vals.add((String) typedVal);
+                } else if (typedVal instanceof Object && typedVal instanceof List<?>) {
+                    // Case List<Object>
+                    for (Object item : (List<Object>) typedVal) {
+                        if (item instanceof String) {
+                            String strVal = (String) item;
+                            vals.add(strVal);
+                        } else {
+                            throw new Exception(
+                                    v.getSegmentName() + " is a list of " + item.getClass().getName()
+                                            + ", not Strings");
+                        }
+                    }
+                } else {
+                    // Case default
+                    throw new Exception(
+                            v.getSegmentName() + " is a " + typedVal.getClass().getName() + ", not a String");
+                }
+            }
+        }
+
+        this.values.put(v.getSegmentName(), vals);
+        this.values.put(v.getSegment(), vals); // this is the shortcut ${properties}, instead of ${x.y.properties}
     }
 
 }
