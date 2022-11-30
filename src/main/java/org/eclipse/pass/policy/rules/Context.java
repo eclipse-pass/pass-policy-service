@@ -73,14 +73,13 @@ public class Context extends VariablePinner {
         }
 
         Variable segment = new Variable("");
-        try {
-            // Resolve each part of the variable (e.g. a, a.b, a.b.c, a.b.c.d)
-            for (segment = variable.shift(); variable.isShifted(); segment = segment.shift()) {
-                Boolean error = this.resolveSegment(segment);
+        // Resolve each part of the variable (e.g. a, a.b, a.b.c, a.b.c.d)
+        for (segment = variable.shift(); variable.isShifted(); segment = segment.shift()) {
+            try {
+                this.resolveSegment(segment);
+            } catch (Exception e) {
+                throw new Exception("Could not resolve variable segment " + segment.getSegmentName(), e);
             }
-
-        } catch (Exception e) {
-            throw new Exception("Could not resolve variable segment" + segment.getSegmentName());
         }
 
         return null;
@@ -135,17 +134,107 @@ public class Context extends VariablePinner {
      * @param segment - the segment to be resolved
      * @return Boolean - a segment will either resolve or fail
      */
-    public Boolean resolveSegment(Variable segment) {
+    public void resolveSegment(Variable segment) throws Exception {
 
-        // if we already have a value, no need to re-resolve it. Likewise, no point in
+        // If we already have a value, no need to re-resolve it. Likewise, no point in
         // resolving ${} from ${x}
         Boolean hasKey = this.values.containsKey(segment.getSegmentName());
         Boolean hasValue = this.values.get(segment.getSegmentName()) != null;
         if ((hasKey && hasValue) || segment.prev().getSegmentName() == "") {
-            return null;
+            return;
         }
 
-        return null;
+        // We need to resolve the previous segment into a map, (or list of maps) if it
+        // isn't already, and extract its value
+        Object prevValue = this.values.get(segment.prev().getSegmentName());
+
+        // ${foo} is a JSON object, or list of JSON objects, or a JSON blob that had
+        // previously been resolved from URIs. So just look up key 'bar' and save those
+        // values to ${foo.bar}
+        if (prevValue instanceof ResolvedObject && !(prevValue instanceof List<?>)) {
+            // Case ResolvedObject
+            this.extractValue(segment, (ResolvedObject) prevValue);
+        } else if (prevValue instanceof ResolvedObject && prevValue instanceof List<?>) {
+            // Case []ResolvedObject
+            this.extractValues(segment, (List<ResolvedObject>) prevValue);
+        }
+
+        // ${foo} is a String, or list of Strings. In order to find ${foo.bar}, see if
+        // each foo is a stringified JSON blob, or an HTTP URI.
+        // If it's a blob, parse to a JSON object and save it as a ResolvedObject to
+        // ${foo.bar}.
+        // If it's a URI, dereference it and, if its a JSON blob, parse it to a JSON
+        // object and save a ResolvedObject containing both the URI and the resulting
+        // blob to ${foo.bar}
+        else if (prevValue instanceof String && !(prevValue instanceof List<?>)) {
+            // Case String
+            // if it can't be resolved to an object, throw an error
+
+            this.resolveSegment(segment);
+
+        } else if (prevValue instanceof String && prevValue instanceof List<?>) {
+            // Case []String
+            // if it cant be resolved to objects, throw an error
+
+            this.resolveSegment(segment);
+        }
+
+        // ${foo} is a list of some sort, but we don't know the type of the items. If
+        // they are URIs, dereference the URIs.
+        // If the Result is a JSON blob, parse it and look up the value of the key 'bar'
+        // in each blob. Save to ${foo.bar}
+        else if (prevValue instanceof Object && prevValue instanceof List<?>) {
+            // Case Object
+            // error checking
+
+            this.resolveSegment(segment);
+        }
+
+        // ${bar} has no value, so of course ${foo.bar} has no value either
+        else if (prevValue == null) {
+            // Case Null
+            this.values.put(segment.getSegmentName(), new ArrayList<String>());
+        }
+
+        // ${bar} is some unexpected type.
+        else {
+            // Case Default
+            // do something
+        }
+
+        return;
+    }
+
+    /**
+     * extractValue()
+     * Set ${foo.bar} to foo[bar]
+     *
+     * @param v
+     * @param resolved
+     */
+    public void extractValue(Variable v, ResolvedObject resolved) {
+        String val = resolved.getObject().get(v.getSegment());
+
+        if (val == null) {
+            this.values.put(v.getSegmentName(), new ArrayList<String>());
+            this.values.put(v.getSegment(), new ArrayList<String>());
+        }
+
+        List<String> valList = new ArrayList<String>();
+        valList.add(val);
+        this.values.put(v.getSegmentName(), valList);
+        this.values.put(v.getSegment(), valList);
+    }
+
+    /**
+     * extractValues()
+     * Append foo[bar] to ${foo.bar} for each foo
+     *
+     * @param v
+     * @param resolved
+     */
+    public void extractValues(Variable v, List<ResolvedObject> resolved) {
+
     }
 
 }

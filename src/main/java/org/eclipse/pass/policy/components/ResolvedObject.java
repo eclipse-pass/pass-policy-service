@@ -18,4 +18,45 @@ public class ResolvedObject {
         this.source = source;
         this.object = object;
     }
+
+    /**
+     * getSource()
+     *
+     * @return URI
+     */
+    public URI getSource() {
+        return this.source;
+    }
+
+    /**
+     * setSource()
+     *
+     * @param source
+     */
+    public void setSource(URI source) {
+        this.source = source;
+    }
+
+    /**
+     * getObject()
+     *
+     * @return Map<String, String>
+     */
+    public Map<String, String> getObject() {
+        if (this.object.size() > 0) {
+            return this.object;
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * setObject()
+     *
+     * @param object
+     */
+    public void setObject(Map<String, String> object) {
+        this.object = object;
+    }
+
 }
