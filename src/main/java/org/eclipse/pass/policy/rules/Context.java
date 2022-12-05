@@ -1,7 +1,6 @@
 package org.eclipse.pass.policy.rules;
 
 import java.net.URI;
-import java.security.cert.URICertStoreParameters;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -159,7 +158,7 @@ public class Context extends VariablePinner {
             // Case List<ResolvedObject>
             this.extractValues(segment, (List<ResolvedObject>) prevValue);
         } else if (prevValue instanceof URI && !(prevValue instanceof List<?>)) {
-            // Case String
+            // Case URI
             // ${foo} is a URI, or list of URIs. In order to find ${foo.bar}, see if
             // each foo is a stringified JSON blob, or an HTTP URI.
             // If it's a blob, parse to a JSON object and save it as a ResolvedObject to
@@ -268,11 +267,54 @@ public class Context extends VariablePinner {
         this.values.put(v.getSegment(), vals); // this is the shortcut ${properties}, instead of ${x.y.properties}
     }
 
-    public void resolveToObject(Variable v, URI s) throws Exception {
-        ResolvedObject resolved = new ResolvedObject(s, new HashMap<String, Object>());
+    /**
+     * resolveToObject()
+     * Resolve a URI to an object. This will only work if the URI is a valid http
+     * URI, or a JSON blob.
+     *
+     * @param v - the variable to resolve
+     * @param s - the URI to be resolved
+     * @throws Exception - the source is not a valid URI or JSON blob
+     */
+    public void resolveToObject(Variable v, URI source) throws Exception {
+        ResolvedObject resolved = new ResolvedObject(source, new HashMap<String, Object>());
+
+        this.values.put(v.getSegmentName(), resolved);
+        this.values.put(v.getSegment(), resolved);
+
+        // If it's a URI, try resolving it
+        if (source.toString().startsWith("http")) {
+            // this.passClient.readResource(s, Object.class);
+        }
+
+        // Otherwise, attempt to decode it as a JSON blob
     }
 
+    /**
+     * resolveToObjects()
+     * Resolve each of a list of URIs to an object. This will only work if each URI
+     * is a valid URI, or a JSON blob.
+     *
+     * @param v    - the variable to resolve
+     * @param vals - the list of URIs to be resolved
+     */
     public void resolveToObjects(Variable v, List<URI> vals) {
+        List<ResolvedObject> objects = new ArrayList<ResolvedObject>();
 
+        for (URI source : vals) {
+            ResolvedObject resolved = new ResolvedObject(source, new HashMap<String, Object>());
+
+            // If it's a URI, try resolving it
+            if (source.toString().startsWith("http")) {
+                // this.passClient.readResource(s, Object.class)
+            } else {
+                // Otherwise, attempt to decode it as a JSON blob
+            }
+
+            objects.add(resolved);
+        }
+
+        this.values.put(v.getSegmentName(), objects);
+        this.values.put(v.getSegment(), objects);
     }
 }
