@@ -19,27 +19,33 @@ public class Condition {
     }
 
     public Boolean apply(VariableResolver variables) throws Exception {
+        Boolean passes = false;
         for (String cond : conditions) {
-            switch (cond) {
-                case "endsWith":
-                    endsWith(cond, variables);
-                    break;
-                case "equals":
-                    equals(cond, variables);
-                    break;
-                case "anyOf":
-                    anyOf(cond, variables);
-                    break;
-                case "noneOf":
-                    noneOf(cond, variables);
-                    break;
-                case "contains":
-                    contains(cond, variables);
-                    break;
-                default:
-                    throw new Exception("Unknown condition " + cond);
+            try {
+                switch (cond) {
+                    case "endsWith":
+                        endsWith(cond, variables);
+                        break;
+                    case "equals":
+                        equals(cond, variables);
+                        break;
+                    case "anyOf":
+                        anyOf(cond, variables);
+                        break;
+                    case "noneOf":
+                        noneOf(cond, variables);
+                        break;
+                    case "contains":
+                        contains(cond, variables);
+                        break;
+                    default:
+                        throw new Exception("Unknown condition " + cond);
+                }
+            } catch (Exception e) {
+                throw new Exception("Could not evaluate condition " + cond, e);
             }
         }
+
         return null;
     }
 
