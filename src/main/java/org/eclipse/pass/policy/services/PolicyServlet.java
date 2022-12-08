@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.dataconservancy.pass.model.Policy;
+import org.eclipse.pass.policy.interfaces.PolicyService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,13 +29,22 @@ public class PolicyServlet extends HttpServlet {
 
     private static final Logger LOG = LoggerFactory.getLogger(PolicyServlet.class);
 
-    private PolicyServiceImpl policyService = new PolicyServiceImpl();
+    private PolicyService policyService;
 
     /**
      * @see HttpServlet#HttpServlet()
      */
     public PolicyServlet() {
         super();
+        policyService = new PolicyServiceImpl();
+    }
+
+    /**
+     * @param policyService
+     */
+    public PolicyServlet(PolicyService policyService) {
+        super();
+        this.policyService = policyService;
     }
 
     /**

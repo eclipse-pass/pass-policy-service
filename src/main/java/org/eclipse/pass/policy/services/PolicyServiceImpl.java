@@ -21,16 +21,16 @@ import org.eclipse.pass.policy.rules.DSL;
  */
 public class PolicyServiceImpl implements PolicyService {
 
-    PassClient passClient = PassClientFactory.getPassClient();
+    PassClient passClient;
 
-    /**
-     * PolicyService.findPolicies()
-     *
-     * @param submissionURI - PASS submissionURI
-     * @param headers       - request headers
-     * @return List<Policy> - List of policies relevant to submissionURI
-     * @throws Exception
-     */
+    public PolicyServiceImpl() {
+        this.passClient = PassClientFactory.getPassClient();
+    }
+
+    public PolicyServiceImpl(PassClient client) {
+        this.passClient = client;
+    }
+
     @Override
     public List<Policy> findPolicies(URI submissionURI, Map<String, Object> headers) throws Exception {
         Context context = new Context(submissionURI, headers, passClient);
@@ -46,7 +46,6 @@ public class PolicyServiceImpl implements PolicyService {
 
     // }
 
-    // Repositories endpoint functions
     @Override
     public List<Repository> findRepositories(URI submissionURI, Map<String, Object> headers) {
         return null;
