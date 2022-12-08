@@ -65,6 +65,7 @@ public class PolicyServlet extends HttpServlet {
 
         // handle empty request submission error
         if (submission == null) {
+            LOG.error("No submission query param provided");
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "No submission query param provided");
             return;
         }
@@ -84,8 +85,9 @@ public class PolicyServlet extends HttpServlet {
         try {
             List<Policy> policies = policyService.findPolicies(submission, headers);
         } catch (Exception e) {
-            // catch generic error for now, will be refined later provide context
+            LOG.error("Unable to find relevant policies", e);
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
+            return;
         }
 
         response.getWriter().append("Served at: ").append(request.getContextPath());
