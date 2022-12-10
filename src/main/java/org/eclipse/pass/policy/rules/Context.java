@@ -5,9 +5,11 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Map.Entry;
 
 import org.dataconservancy.pass.client.PassClient;
@@ -15,8 +17,6 @@ import org.eclipse.pass.policy.components.ResolvedObject;
 import org.eclipse.pass.policy.components.VariablePinner;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import com.fasterxml.jackson.core.io.JsonEOFException;
 
 /**
  * Represents the Context object
@@ -68,19 +68,21 @@ public class Context extends VariablePinner {
 
     @Override
     public List<String> resolve(String source) throws Exception {
-        // resolve a variable returning a list of strings
+        // Initialise the values map and create a new list to store the resolved
+        // variables
         this.init(source);
         List<String> resolved = new ArrayList<String>();
 
-        // check for proper variable conversion
+        // Check for proper variable conversion. If the conversion is null, return the
+        // source as the resolved variable.
         Variable variable = Variable.toVariable(source);
         if (variable == null) {
             resolved.add(source);
             return resolved;
         }
 
+        // Resolve each segment of the variable (e.g. a, a.b, a.b.c, a.b.c.d)
         Variable segment = new Variable("");
-        // Resolve each part of the variable (e.g. a, a.b, a.b.c, a.b.c.d)
         for (segment = variable.shift(); variable.isShifted(); segment = segment.shift()) {
             try {
                 this.resolveSegment(segment);
@@ -89,6 +91,46 @@ public class Context extends VariablePinner {
             }
         }
 
+        // Get the fully-resolved variable from the values map and determine type.
+        Object typedVariable = this.values.get(variable.getFullName());
+        if (typedVariable instanceof String && !(typedVariable instanceof List<?>)) {
+            // Case String
+            // Add variable to resolved list
+            resolved.add((String) typedVariable);
+            return resolved;
+        } else if (typedVariable instanceof String && typedVariable instanceof List<?>) {
+            // Cast List<String>
+            // Return the unique variables in the list
+            return unique((List<String>) typedVariable);
+        } else if (typedVariable instanceof ResolvedObject && !(typedVariable instanceof List<?>)) {
+            // Case ResolvedObject
+            // Return the source of the object
+            ResolvedObject val = (ResolvedObject) typedVariable;
+            resolved.add(val.getSource());
+            return resolved;
+        } else if (typedVariable instanceof ResolvedObject && typedVariable instanceof List<?>) {
+            // Case List<ResolvedObject>
+            // Return the source of each unique object in the list
+            for (ResolvedObject val : (List<ResolvedObject>) typedVariable) {
+                resolved.add(val.getSource());
+            }
+            return unique(resolved);
+        } else if (typedVariable instanceof Object && typedVariable instanceof List<?>) {
+            // Case List<Object>
+            // Return any strings present in the list of Objects
+            for (Object val : (List<Object>) typedVariable) {
+                if (val instanceof String) {
+                    resolved.add((String) val);
+                }
+            }
+            return unique(resolved);
+        } else if (typedVariable == null) {
+            // Case null
+            // If the variable is not in the values map, return an empty list
+            return new ArrayList<String>();
+        }
+
+        // The variable could not be resolved
         return null;
     }
 
@@ -174,7 +216,7 @@ public class Context extends VariablePinner {
 
             this.resolveSegment(segment);
         } else if (prevValue instanceof String && prevValue instanceof List<?>) {
-            // Case List<URI>
+            // Case List<String>
             this.resolveToObjects(segment.prev(), (List<String>) prevValue);
 
             this.resolveSegment(segment);
@@ -184,20 +226,36 @@ public class Context extends VariablePinner {
             // they are URIs, dereference the URIs.
             // If the Result is a JSON blob, parse it and look up the value of the key 'bar'
             // in each blob. Save to ${foo.bar}
-            // error checking
+            List<String> list = new ArrayList<String>();
+
+            for (Object item : (List<Object>) prevValue) {
+                if (!(item instanceof String)) {
+                    throw new Exception("Expecting list items to be strings, instead got " + item.getClass().getName());
+                }
+
+                list.add((String) item);
+            }
+
+            try {
+                this.resolveToObjects(segment.prev(), list);
+            } catch (Exception e) {
+                throw new Exception("Could not resolve all uris in " + segment.prev().getSegmentName(), e);
+            }
 
             this.resolveSegment(segment);
         } else if (prevValue == null) {
             // Case Null
             // ${bar} has no value, so of course ${foo.bar} has no value either
+
             this.values.put(segment.getSegmentName(), new ArrayList<String>());
+            this.values.put(segment.getSegment(), new ArrayList<String>());
         } else {
             // Case Default
             // ${bar} is some unexpected type.
-            // do something
-        }
 
-        return;
+            throw new Exception(segment.prev().getSegmentName() + " is a" + prevValue.getClass().getName()
+                    + ", cannot parse into an object to extract " + segment.getSegmentName());
+        }
     }
 
     /**
@@ -339,5 +397,21 @@ public class Context extends VariablePinner {
         } catch (URISyntaxException | JSONException e) {
             throw new Exception("Unable to resolve source to an object", e);
         }
+    }
+
+    /**
+     * Accepts a string and removes duplicates, returns the resulting list.
+     *
+     * @param vals - the list of strings to be parsed for unique values
+     * @return List<String> - the list with duplicates removed
+     */
+    public List<String> unique(List<String> vals) {
+        Set<String> uniqueVals = new HashSet<String>();
+
+        for (String str : vals) {
+            uniqueVals.add(str);
+        }
+
+        return new ArrayList<String>(uniqueVals);
     }
 }
