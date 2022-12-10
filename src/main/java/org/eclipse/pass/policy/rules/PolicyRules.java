@@ -39,17 +39,17 @@ public class PolicyRules {
         // If the policy ID is a variable, we need to resolve/expand it. If the result
         // is a list of IDs, we return a list of policies, each one with an ID from the
         // list.
-        if (Variable.isVariable(policy.getId())) {
+        if (Variable.isVariable(policy.getId().toString())) {
 
             // resolve policy ID/s
-            List<URI> resolvedIDs = new ArrayList<URI>();
+            List<String> resolvedIDs = new ArrayList<String>();
             try {
-                resolvedIDs.addAll(variables.resolve(policy.getId()));
+                resolvedIDs.addAll(variables.resolve(policy.getId().toString()));
 
-                URI curID = resolvedIDs.get(0); // for exception handling
+                String curID = resolvedIDs.get(0); // for exception handling
                 try {
 
-                    for (URI id : resolvedIDs) {
+                    for (String id : resolvedIDs) {
 
                         // Now that we have a concrete ID, resolve any other variables elsewhere in the
                         // policy. Some of them may depend on knowing the ID we just found.
@@ -63,7 +63,8 @@ public class PolicyRules {
                         resolved.setPolicyUrl(policy.getPolicyUrl());
                         resolved.setRepositories(policy.getRepositories());
                         resolved.setInstitution(policy.getInstitution());
-                        resolved.setId(id);
+                        URI uriID = new URI(id);
+                        resolved.setId(uriID);
                         resolve(resolved, variables.pin(policy.getId(), id));
 
                         resolvedPolicies.add(resolved);

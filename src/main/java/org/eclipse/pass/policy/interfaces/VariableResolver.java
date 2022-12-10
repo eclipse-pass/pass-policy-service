@@ -12,6 +12,6 @@ import java.util.List;
  */
 public interface VariableResolver {
 
-    public List<URI> resolve(URI varString) throws Exception;
+    public List<String> resolve(String varString) throws Exception;
 
 }
