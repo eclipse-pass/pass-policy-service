@@ -32,8 +32,8 @@ public class PolicyServiceImpl implements PolicyService {
     }
 
     @Override
-    public List<Policy> findPolicies(URI submissionURI, Map<String, String> headers) throws Exception {
-        Context context = new Context(submissionURI, headers, passClient);
+    public List<Policy> findPolicies(String submission, Map<String, String> headers) throws Exception {
+        Context context = new Context(submission, headers, passClient);
         DSL dsl = new DSL();
         try {
             return dsl.resolve(context);
