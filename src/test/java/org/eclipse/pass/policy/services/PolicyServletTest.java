@@ -1,4 +1,4 @@
-package org.eclipse.pass.policy;
+package org.eclipse.pass.policy.services;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.atLeast;
@@ -25,7 +25,7 @@ public class PolicyServletTest {
 
     // test doGet()
     @Test
-    @DisplayName("Should return a response to a given request")
+    @DisplayName("Test: Test of doGet() method. Should return a response to a given request")
     void TestDoGet() throws Exception {
         // mock HttpServletRequest & HttpServletResponse
         HttpServletRequest request = mock(HttpServletRequest.class);
@@ -47,7 +47,7 @@ public class PolicyServletTest {
 
     // test doPost()
     @Test
-    @DisplayName("Should return a response to a given request")
+    @DisplayName("Test: Test of doPost() method. Should return a response to a given request")
     void TestDoPost() throws Exception {
         // mock HttpServletRequest & HttpServletResponse
         HttpServletRequest request = mock(HttpServletRequest.class);
