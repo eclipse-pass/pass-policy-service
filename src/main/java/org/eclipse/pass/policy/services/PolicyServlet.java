@@ -61,7 +61,7 @@ public class PolicyServlet extends HttpServlet {
         LOG.debug("Context path: " + request.getContextPath() + "; query string " + request.getQueryString());
 
         // retrieve submission URI from request
-        URI submission = URI.create(request.getParameter("submission"));
+        String submission = request.getParameter("submission");
 
         // handle empty request submission error
         if (submission == null) {

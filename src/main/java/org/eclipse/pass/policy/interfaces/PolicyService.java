@@ -20,12 +20,12 @@ public interface PolicyService {
      * Policies based on the context created by a submission against a set of DSL
      * rules.
      *
-     * @param submissionURI - PASS Submission URI
-     * @param headers       - map of submission headers
+     * @param submission - PASS Submission URI
+     * @param headers    - map of submission headers
      * @return List<Policy> - the list of applicable policies
      * @throws Exception
      */
-    public List<Policy> findPolicies(URI submissionURI, Map<String, String> headers) throws Exception;
+    public List<Policy> findPolicies(String submission, Map<String, String> headers) throws Exception;
 
     /**
      * findRepositories
