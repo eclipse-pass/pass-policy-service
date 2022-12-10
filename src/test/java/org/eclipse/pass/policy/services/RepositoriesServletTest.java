@@ -1,4 +1,4 @@
-package org.eclipse.pass.policy;
+package org.eclipse.pass.policy.services;
 
 public class RepositoriesServletTest {
 

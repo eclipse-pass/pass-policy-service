@@ -1,4 +1,4 @@
-package org.eclipse.pass.policy;
+package org.eclipse.pass.policy.services;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
  * @author David McIntyre
  */
 @DisplayName("PolicyService Tests")
-public class PassPolicyServiceTest {
+public class PassPolicyServiceImplTest {
 
     @Test
     public void demoTest() {
