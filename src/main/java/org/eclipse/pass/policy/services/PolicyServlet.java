@@ -72,7 +72,7 @@ public class PolicyServlet extends HttpServlet {
 
         // retieve map of headers and values from request
         Enumeration<String> headerNames = request.getHeaderNames();
-        Map<String, Object> headers = new HashMap<String, Object>();
+        Map<String, String> headers = new HashMap<String, String>();
         if (headerNames != null) {
             while (headerNames.hasMoreElements()) {
                 String key = (String) headerNames.nextElement();

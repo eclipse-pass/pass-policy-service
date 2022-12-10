@@ -27,8 +27,8 @@ public class Variable extends VariablePinner {
     }
 
     @Override
-    public List<URI> resolve(URI varString) throws Exception {
-        List<URI> resolvedVar = new ArrayList<URI>();
+    public List<String> resolve(String varString) throws Exception {
+        List<String> resolvedVar = new ArrayList<String>();
         resolvedVar.add(varString);
         return resolvedVar;
     }
@@ -46,9 +46,8 @@ public class Variable extends VariablePinner {
      * @param source - the string to be checked
      * @return Boolean - the text either is or isn't a variable
      */
-    public static Boolean isVariable(URI source) {
-        String string = source.toString();
-        Boolean isVariable = string.startsWith("${") && string.endsWith("}");
+    public static Boolean isVariable(String source) {
+        Boolean isVariable = source.startsWith("${") && source.endsWith("}");
         return isVariable;
     }
 
@@ -59,7 +58,7 @@ public class Variable extends VariablePinner {
      * @param source - the string to be checked
      * @return Variable - the converted source for interpolation
      */
-    public static Variable toVariable(URI source) {
+    public static Variable toVariable(String source) {
         // ensure that text is a proper variable
         if (!isVariable(source)) {
             return null;

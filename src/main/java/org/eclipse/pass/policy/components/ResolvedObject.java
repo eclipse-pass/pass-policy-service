@@ -1,7 +1,6 @@
 package org.eclipse.pass.policy.components;
 
-import java.net.URI;
-import java.util.Map;
+import org.json.JSONObject;
 
 /**
  * Represents the ResolvedObject object
@@ -11,10 +10,24 @@ import java.util.Map;
  */
 public class ResolvedObject {
 
-    private URI source;
-    private Map<String, Object> object;
+    private String source;
+    private JSONObject object;
 
-    public ResolvedObject(URI source, Map<String, Object> object) {
+    /**
+     * Constructs a new ResolvedObject with an empty source and JSONObject
+     */
+    public ResolvedObject() {
+        this.source = new String();
+        this.object = new JSONObject();
+    }
+
+    /**
+     * Constructs a new ResolvedObject with specified source and JSONObject
+     *
+     * @param source - the source for the object
+     * @param object - the JSONObject belonging to the source
+     */
+    public ResolvedObject(String source, JSONObject object) {
         this.source = source;
         this.object = object;
     }
@@ -24,7 +37,7 @@ public class ResolvedObject {
      *
      * @return URI
      */
-    public URI getSource() {
+    public String getSource() {
         return this.source;
     }
 
@@ -33,7 +46,7 @@ public class ResolvedObject {
      *
      * @param source
      */
-    public void setSource(URI source) {
+    public void setSource(String source) {
         this.source = source;
     }
 
@@ -42,8 +55,8 @@ public class ResolvedObject {
      *
      * @return Map<String, String>
      */
-    public Map<String, Object> getObject() {
-        if (this.object.size() > 0) {
+    public JSONObject getObject() {
+        if (this.object.length() > 0) {
             return this.object;
         } else {
             return null;
@@ -55,7 +68,7 @@ public class ResolvedObject {
      *
      * @param object
      */
-    public void setObject(Map<String, Object> object) {
+    public void setObject(JSONObject object) {
         this.object = object;
     }
 

@@ -34,17 +34,18 @@ public class RepositoryRules {
         List<Repository> resolvedRepos = new ArrayList<Repository>();
         Repository repository = passClient.readResource(repo, Repository.class);
 
-        if (Variable.isVariable(repository.getId())) {
+        if (Variable.isVariable(repository.getId().toString())) {
 
             // resolve repository ID/s
-            List<URI> resolvedIDs = new ArrayList<URI>();
+            List<String> resolvedIDs = new ArrayList<String>();
 
             try {
-                resolvedIDs.addAll(variables.resolve(repository.getId()));
+                resolvedIDs.addAll(variables.resolve(repository.getId().toString()));
 
-                for (URI id : resolvedIDs) {
+                for (String id : resolvedIDs) {
                     Repository resolved = new Repository();
-                    resolved.setId(id);
+                    URI uriID = new URI(id);
+                    resolved.setId(uriID);
 
                     resolvedRepos.add(resolved);
                 }
