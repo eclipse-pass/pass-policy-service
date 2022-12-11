@@ -26,21 +26,21 @@ import org.json.JSONObject;
  */
 public class Context extends VariablePinner {
 
-    private URI submissionURI;
+    private String submission;
     private Map<String, String> headers;
     private PassClient passClient;
     private Map<String, Object> values;
 
-    public Context(URI submissionURI, Map<String, String> headers, PassClient passClient) {
-        this.submissionURI = submissionURI;
+    public Context(String submission, Map<String, String> headers, PassClient passClient) {
+        this.submission = submission;
         this.headers = headers;
         this.passClient = passClient;
         this.values = new HashMap<String, Object>();
     }
 
-    public Context(URI submissionURI, Map<String, String> headers, PassClient passClient,
+    public Context(String submission, Map<String, String> headers, PassClient passClient,
             Map<String, Object> values) {
-        this.submissionURI = submissionURI;
+        this.submission = submission;
         this.headers = headers;
         this.passClient = passClient;
         this.values = values;
@@ -50,11 +50,11 @@ public class Context extends VariablePinner {
 
         // if the values && headers map are already initialised, we're done
         if (this.values.size() == 0) {
-            if (this.submissionURI == null) {
+            if (this.submission == null) {
                 throw new Exception("Context requires a submission URI");
             }
 
-            this.values.put("submission", this.submissionURI);
+            this.values.put("submission", this.submission);
         }
 
         if (this.headers.size() == 0) {
