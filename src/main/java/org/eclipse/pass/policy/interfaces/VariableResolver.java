@@ -1,6 +1,5 @@
 package org.eclipse.pass.policy.interfaces;
 
-import java.net.URI;
 import java.util.List;
 
 /**

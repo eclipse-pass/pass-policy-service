@@ -5,12 +5,11 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 import org.dataconservancy.pass.client.PassClient;
 import org.eclipse.pass.policy.components.ResolvedObject;
@@ -46,6 +45,12 @@ public class Context extends VariablePinner {
         this.values = values;
     }
 
+    /**
+     * Init values map with request headers
+     * 
+     * @param source - the URI or JSON blob to be resolved
+     * @throws Exception - values map could not be initialised
+     */
     public void init(String source) throws Exception {
 
         // if the values && headers map are already initialised, we're done
@@ -134,15 +139,6 @@ public class Context extends VariablePinner {
         return null;
     }
 
-    /**
-     * Pins a given value to a given variable.
-     * For pinning of context values, Objects must be of type URI.
-     *
-     * @param variable - the URI to pin to
-     * @param value    - the value to be pinned
-     * @return VariablePinner - the pinned object to be returned
-     * @throws Exception - incorrect object types supplied
-     */
     @Override
     public VariablePinner pin(Object variable, Object value) throws Exception {
         if (variable instanceof String && value instanceof String) {
@@ -179,6 +175,7 @@ public class Context extends VariablePinner {
      *
      * @param segment - the segment to be resolved
      * @return Boolean - a segment will either resolve or fail
+     * @throws Exception - segment could not be resolved
      */
     public void resolveSegment(Variable segment) throws Exception {
 
@@ -259,12 +256,11 @@ public class Context extends VariablePinner {
     }
 
     /**
-     * extractValue()
      * Set ${foo.bar} to foo[bar]
      *
      * @param v        - the variable to extract
      * @param resolved - the resolved Object
-     * @throws Exception
+     * @throws Exception - Object is not a String
      */
     public void extractValue(Variable v, ResolvedObject resolved) throws Exception {
         Object val = resolved.getObject().get(v.getSegment());
@@ -286,7 +282,6 @@ public class Context extends VariablePinner {
     }
 
     /**
-     * extractValues()
      * Append foo[bar] to ${foo.bar} for each foo
      *
      * @param v        - the variable to extract
@@ -330,7 +325,6 @@ public class Context extends VariablePinner {
     }
 
     /**
-     * resolveToObject()
      * Resolve a String to an object. This will only work if the String is a valid
      * http URI, or a JSON blob.
      *
@@ -361,13 +355,12 @@ public class Context extends VariablePinner {
     }
 
     /**
-     * resolveToObjects()
      * Resolve each of a list of URIs to an object. This will only work if each URI
      * is a valid URI, or a JSON blob.
      *
      * @param v    - the variable to resolve
      * @param vals - the list of URIs to be resolved
-     * @throws Exception
+     * @throws Exception - source could not be resolved
      */
     public void resolveToObjects(Variable v, List<String> vals) throws Exception {
         List<ResolvedObject> objects = new ArrayList<ResolvedObject>();
@@ -400,18 +393,19 @@ public class Context extends VariablePinner {
     }
 
     /**
-     * Accepts a string and removes duplicates, returns the resulting list.
+     * Returns a supplied list of Strings with duplicates removed.
      *
      * @param vals - the list of strings to be parsed for unique values
      * @return List<String> - the list with duplicates removed
      */
     public List<String> unique(List<String> vals) {
-        Set<String> uniqueVals = new HashSet<String>();
 
-        for (String str : vals) {
-            uniqueVals.add(str);
+        if (vals.size() < 2) {
+            return vals;
         }
 
-        return new ArrayList<String>(uniqueVals);
+        List<String> uniqueVals = vals.stream().distinct().collect(Collectors.toList());
+
+        return uniqueVals;
     }
 }
