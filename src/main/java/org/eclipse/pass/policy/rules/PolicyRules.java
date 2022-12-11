@@ -20,7 +20,6 @@ public class PolicyRules {
 
     private RepositoryRules repositoryRules;
 
-    private Policy policy;
     private List<Repository> repositories;
     private List<Condition> conditions;
 
@@ -30,7 +29,7 @@ public class PolicyRules {
      *
      * @param variables - the ruleset to be resolved against
      * @return List<Policy> - the List of resolved Policies
-     * @throws Exception -
+     * @throws Exception - Policy could not be resolved
      */
     public List<Policy> resolve(Policy policy, VariablePinner variables) throws Exception {
         List<Policy> resolvedPolicies = new ArrayList<Policy>();
@@ -85,7 +84,7 @@ public class PolicyRules {
                 // policy.setRepositories(resolvedRepos);
 
                 try {
-                    Boolean valid = applyConditions(policy, variables);
+                    Boolean valid = applyConditions(variables);
 
                     if (valid) {
                         resolvedPolicies.add(policy);
@@ -101,24 +100,55 @@ public class PolicyRules {
         return uniquePolicies(resolvedPolicies);
     }
 
+    /**
+     * Receives a policy and a set of variables to resolve against. Returns a list
+     * of applicable policies to the given policy.
+     *
+     * @param policy    - the parent Policy for repositories
+     * @param variables - the variables to resolved against
+     * @return List<Repository> - the list of resolved repositories
+     * @throws Exception - repositories could not be resolved
+     */
     public List<Repository> resolveRepositories(Policy policy, VariablePinner variables) throws Exception {
         List<Repository> resolvedRepos = new ArrayList<Repository>();
 
         try {
             for (URI repo : policy.getRepositories()) {
-                List<Repository> repos = repositoryRules.resolve(repo, variables);
+                List<Repository> repos = this.repositoryRules.resolve(repo, variables);
 
                 resolvedRepos.addAll(repos);
             }
         } catch (Exception e) {
             throw new Exception("Could not resolve repositories for " + policy.getId().toString(), e);
         }
-        return null;
+
+        return resolvedRepos;
     }
 
-    private Boolean applyConditions(Policy policy2, VariablePinner variables) {
+    /**
+     * Applies conditions present if any for the current policy. Evaluates
+     * conditions on supplied variables. Returns true if all conditions are met,
+     * otherwise returns false.
+     *
+     * @param variables - the variables to check conditions against
+     * @return Boolean - true if variables meet all conditions, false otherwise
+     * @throws Exception - Condition could not be resolved
+     */
+    private Boolean applyConditions(VariablePinner variables) throws Exception {
+        Boolean valid;
+        try {
+            for (Condition cond : this.conditions) {
+                valid = cond.apply(variables);
 
-        return null;
+                if (!valid) {
+                    return false;
+                }
+            }
+        } catch (Exception e) {
+            throw new Exception("Invalid condition", e);
+        }
+
+        return true;
     }
 
     /**
