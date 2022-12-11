@@ -7,7 +7,7 @@ import java.util.List;
 import org.dataconservancy.pass.client.PassClient;
 import org.dataconservancy.pass.client.PassClientFactory;
 import org.dataconservancy.pass.model.Repository;
-import org.eclipse.pass.policy.components.VariablePinner;
+import org.eclipse.pass.policy.interfaces.VariableResolver;
 
 /**
  * Represents the RepositoryRules object
@@ -28,9 +28,9 @@ public class RepositoryRules {
      *
      * @param variables - the ruleset to be resolved against
      * @return List<Repository> - the List of resolved Repositories
-     * @throws Exception -
+     * @throws Exception - Repository could not be resolved
      */
-    public List<Repository> resolve(URI repo, VariablePinner variables) throws Exception {
+    public List<Repository> resolve(URI repo, VariableResolver variables) throws Exception {
         List<Repository> resolvedRepos = new ArrayList<Repository>();
         Repository repository = passClient.readResource(repo, Repository.class);
 
@@ -55,6 +55,7 @@ public class RepositoryRules {
         } else {
             resolvedRepos.add(repository);
         }
+
         return resolvedRepos;
     }
 
