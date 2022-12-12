@@ -46,6 +46,7 @@ public class Condition {
     public Boolean apply(VariableResolver variables) throws Exception {
         Boolean passes;
 
+        // If there are no conditions present, then the policy is applicable
         if (conditions.isEmpty()) {
             return passes = true;
         }
@@ -137,6 +138,16 @@ public class Condition {
         return !passes;
     }
 
+    /**
+     * Evaluate each pair of values supplied using the given test function supplied
+     * (either endsWith(), contains() or equals()).
+     *
+     * @param source    - the values to be evaluated
+     * @param variables - optional variables. Set to null to pass through
+     * @param test      - supplied test function for evaluation of value pair
+     * @return Boolean - value pair passes test function or not
+     * @throws Exception - could not test value pair
+     */
     public Boolean eachPair(Object source, VariableResolver variables, Evaluation test)
             throws Exception {
         if (!(source instanceof JSONArray)) {
