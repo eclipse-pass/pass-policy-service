@@ -1,10 +1,11 @@
 package org.eclipse.pass.policy.rules;
 
-import java.net.URI;
 import java.util.List;
 
 import org.eclipse.pass.policy.interfaces.Evaluation;
 import org.eclipse.pass.policy.interfaces.VariableResolver;
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
@@ -25,31 +26,48 @@ public class Condition {
 
     private JSONObject conditions;
 
+    public Condition() {
+        this.conditions = new JSONObject();
+    }
+
     public Condition(JSONObject conditions) {
         this.conditions = conditions;
     }
 
+    /**
+     * Checks if a policy meets any conditions supplied and returns a Boolean value
+     * indicating whether or not a policy is applicable. If no conditions are
+     * present, then the policy is applicable.
+     *
+     * @param variables - optional variables. Set to null to pass through
+     * @return Boolean - Policy is applicable or not
+     * @throws Exception - could not evaluate condition
+     */
     public Boolean apply(VariableResolver variables) throws Exception {
         Boolean passes;
+
+        if (conditions.isEmpty()) {
+            return passes = true;
+        }
 
         for (String cond : conditions.keySet()) {
             passes = false;
             try {
                 switch (cond) {
                     case "endsWith":
-                        passes = endsWith(conditions.get(cond), variables);
+                        passes = endsWith(conditions.getJSONArray(cond), variables);
                         break;
                     case "equals":
-                        passes = equals(conditions.get(cond), variables);
+                        passes = equals(conditions.getJSONArray(cond), variables);
                         break;
                     case "anyOf":
-                        passes = anyOf(conditions.getJSONArray(cond).toList(), variables);
+                        passes = anyOf(conditions.getJSONObject(cond), variables);
                         break;
                     case "noneOf":
-                        passes = noneOf(conditions.getJSONArray(cond).toList(), variables);
+                        passes = noneOf(conditions.getJSONObject(cond), variables);
                         break;
                     case "contains":
-                        passes = contains(conditions.get(cond), variables);
+                        passes = contains(conditions.getJSONArray(cond), variables);
                         break;
                     default:
                         throw new Exception("Unknown condition " + cond);
@@ -82,25 +100,28 @@ public class Condition {
         return eachPair(fromCondition, variables, test);
     }
 
-    public Boolean anyOf(List<Object> arg, VariableResolver variables) throws Exception {
-        if (!(arg instanceof List)) {
-            throw new Exception("Expecting a list, but got " + arg.getClass());
+    public Boolean anyOf(Object arg, VariableResolver variables) throws Exception {
+        if (!(arg instanceof JSONObject)) {
+            throw new Exception("Expecting a JSONObject, but got " + arg.getClass());
         }
 
-        List<Object> list = arg;
+        JSONObject args = (JSONObject) arg;
         Boolean passes;
 
-        for (Object item : list) {
+        for (String evaluation : args.keySet()) {
             passes = false;
-            if (!(item instanceof JSONObject)) {
-                throw new Exception("Expecting a JSON object as a list item, but got " + item.getClass());
+            if (!(args.get(evaluation) instanceof JSONArray)) {
+                throw new Exception(
+                        "Expecting a JSONArray as an evaluator item, but got " + args.get(evaluation).getClass());
             }
 
-            JSONObject object = (JSONObject) item;
+            JSONArray values = (JSONArray) args.get(evaluation);
+            JSONObject test = new JSONObject().put(evaluation, values);
+
             try {
-                passes = new Condition(object).apply(variables);
+                passes = new Condition(test).apply(variables);
             } catch (Exception e) {
-                throw new Exception("Condition failed to apply", e);
+                throw new Exception("Condition failed to apply: " + test, e);
             }
 
             if (passes) {
@@ -111,47 +132,51 @@ public class Condition {
         return false;
     }
 
-    public Boolean noneOf(List<Object> arg, VariableResolver variables) throws Exception {
+    public Boolean noneOf(Object arg, VariableResolver variables) throws Exception {
         Boolean passes = anyOf(arg, variables);
         return !passes;
     }
 
-    public Boolean eachPair(Object source, VariableResolver variables, Evaluation test) throws Exception {
-        if (!(source instanceof JSONObject)) {
-            throw new Exception("Expecting a JSON object, instead got a " + source.getClass());
+    public Boolean eachPair(Object source, VariableResolver variables, Evaluation test)
+            throws Exception {
+        if (!(source instanceof JSONArray)) {
+            throw new Exception("Expecting a JSON array, instead got a " + source.getClass());
         }
 
-        JSONObject operands = (JSONObject) source;
+        JSONArray fromCondition = (JSONArray) source;
 
-        // If there's no resolver, just pass through.
-        if (variables == null) {
-            variables = new Variable("");
-        }
+        try {
+            String a = fromCondition.getString(1);
+            String b = fromCondition.getString(0);
 
-        for (String b : operands.keySet()) {
-            if (!(operands.get(b) instanceof URI)) {
-                throw new Exception("Given a " + source.getClass() + " instead of a URI");
+            // If there's no resolver, just pass through.
+            if (variables == null) {
+                variables = new Variable("");
             }
-
-            URI variable = (URI) operands.get(b);
-            String a;
 
             try {
-                // a = singleValued(variables.resolve(variable));
-                // b = singleValued(variables.resolve(b));
-
-                // if (!test.eval(a, b)) {
-                // return false;
-                // }
+                a = singleValued(variables.resolve(a));
             } catch (Exception e) {
-                throw new Exception("Could not resolve variable " + variable);
+                throw new Exception("Could not resolve variable " + a, e);
             }
+
+            try {
+                b = singleValued(variables.resolve(b));
+            } catch (Exception e) {
+                throw new Exception("Could not resolve variable " + b, e);
+            }
+
+            if (!test.eval(a, b)) {
+                return false;
+            }
+        } catch (JSONException e) {
+            throw new Exception("Condition contains a " + source.getClass() + " instead of a String");
         }
 
         return true;
     }
 
-    public String singleValued(List<URI> list) throws Exception {
+    public String singleValued(List<String> list) throws Exception {
         if (list.isEmpty()) {
             return "";
         }

@@ -21,7 +21,7 @@ public class Variable extends VariablePinner {
     private Boolean shifted;
 
     public Variable(String fullName) {
-        this.fullName = fullName;
+        super();
         this.shifted = false;
     }
 
