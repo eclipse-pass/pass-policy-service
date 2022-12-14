@@ -3,8 +3,13 @@ package org.eclipse.pass.policy.rules;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.Mockito.when;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 
 import org.dataconservancy.pass.client.PassClient;
 import org.dataconservancy.pass.model.Policy;
@@ -126,43 +131,34 @@ public class ContextTest {
      * Unit tests for resolveToObject() method in Context
      */
 
-    /**
-     * Unit tests for resolveToObjects() method in Context
-     *
-     * @throws URISyntaxException
-     */
-    // @Test
-    // @DisplayName("Test: Test resolveToObjects() with a list of valid submission
-    // URIs")
-    // public void testResolveToObjectsValid() throws URISyntaxException {
-    // List<String> uris = Arrays.asList(
-    // "http://example.com/policies/1",
-    // "http://example.com/policies/2");
-    // Variable v = new Variable("foo.bar.baz.policy");
-    // v.setSegment("policySegmentName");
-    // v.setSegmentName("policySegment");
-    // List<ResolvedObject> expected = Arrays.asList(
-    // new ResolvedObject("http://example.com/policies/1", mockPolicy),
-    // new ResolvedObject("http://example.com/policies/2", mockPolicy));
-    // when(mockPassClient.readResource(new URI("http://example.com/policies/1"),
-    // Policy.class))
-    // .thenReturn(mockPolicy);
-    // when(mockPassClient.readResource(new URI("http://example.com/policies/2"),
-    // Policy.class))
-    // .thenReturn(mockPolicy);
-    // try {
-    // context.setPassClient(mockPassClient);
-    // context.resolveToObjects(v, uris);
-    // } catch (Exception e) {
-    // fail("Unexpected Exception thrown for valid submission", e);
-    // }
+    @Test
+    @DisplayName("Test: Test resolveToObjects() with a list of valid submission URIs")
+    public void testResolveToObjectsValid() throws URISyntaxException {
+        List<String> uris = Arrays.asList(
+                "http://example.com/policies/1",
+                "http://example.com/policies/2");
+        Variable v = new Variable("foo.bar.baz.policy");
+        v.setSegment("policySegmentName");
+        v.setSegmentName("policySegment");
+        List<ResolvedObject> expected = Arrays.asList(
+                new ResolvedObject("http://example.com/policies/1", mockPolicy),
+                new ResolvedObject("http://example.com/policies/2", mockPolicy));
+        when(mockPassClient.readResource(new URI("http://example.com/policies/1"),
+                Policy.class))
+                .thenReturn(mockPolicy);
+        when(mockPassClient.readResource(new URI("http://example.com/policies/2"),
+                Policy.class))
+                .thenReturn(mockPolicy);
+        try {
+            context.setPassClient(mockPassClient);
+            context.resolveToObjects(v, uris);
+        } catch (Exception e) {
+            fail("Unexpected Exception thrown for valid submission", e);
+        }
 
-    // List<Object> result = Arrays.asList(
-    // context.getValues().get("policySegmentName"),
-    // context.getValues().get("policySegment"));
-    // assertTrue(expected.equals(result.get(0)));
-    // assertTrue(expected.equals(result.get(1)));
-    // }
+        assertTrue(expected.equals(context.getValues().get("policySegmentName")));
+        assertTrue(expected.equals(context.getValues().get("policySegmentName")));
+    }
 
     // @Test
     // public void testResolveToObjects_policyUri() throws Exception {

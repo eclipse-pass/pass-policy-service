@@ -40,7 +40,8 @@ public class ResolvedObject {
             return false;
         }
         ResolvedObject resolvedObject = (ResolvedObject) o;
-        return Objects.equals(source, resolvedObject.source) && Objects.equals(object, resolvedObject.object);
+        return Objects.equals(source, resolvedObject.source)
+                && object.toString().equals(resolvedObject.object.toString());
     }
 
     @Override
