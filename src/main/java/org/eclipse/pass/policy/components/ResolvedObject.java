@@ -1,5 +1,8 @@
 package org.eclipse.pass.policy.components;
 
+import java.util.Objects;
+
+import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
@@ -13,23 +16,35 @@ public class ResolvedObject {
     private String source;
     private JSONObject object;
 
-    /**
-     * Constructs a new ResolvedObject with an empty source and JSONObject
-     */
     public ResolvedObject() {
         this.source = new String();
         this.object = new JSONObject();
     }
 
-    /**
-     * Constructs a new ResolvedObject with specified source and JSONObject
-     *
-     * @param source - the source for the object
-     * @param object - the JSONObject belonging to the source
-     */
     public ResolvedObject(String source, JSONObject object) {
         this.source = source;
         this.object = object;
+    }
+
+    public ResolvedObject(String source, Object object) {
+        this.source = source;
+        this.setObject(object);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this)
+            return true;
+        if (!(o instanceof ResolvedObject)) {
+            return false;
+        }
+        ResolvedObject resolvedObject = (ResolvedObject) o;
+        return Objects.equals(source, resolvedObject.source) && Objects.equals(object, resolvedObject.object);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(source, object);
     }
 
     /**
@@ -70,6 +85,20 @@ public class ResolvedObject {
      */
     public void setObject(JSONObject object) {
         this.object = object;
+    }
+
+    /**
+     * setObject(Object)
+     *
+     * @param object
+     */
+    public void setObject(Object object) {
+        try {
+            JSONObject json = new JSONObject(object);
+            this.setObject(json);
+        } catch (JSONException e) {
+            throw new JSONException("Unable to resolve " + object + " to a valid JSON object", e);
+        }
     }
 
 }

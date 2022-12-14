@@ -1,5 +1,6 @@
 package org.eclipse.pass.policy.rules;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -12,6 +13,8 @@ import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import org.dataconservancy.pass.client.PassClient;
+import org.dataconservancy.pass.model.Policy;
+import org.dataconservancy.pass.model.Repository;
 import org.eclipse.pass.policy.components.ResolvedObject;
 import org.eclipse.pass.policy.components.VariablePinner;
 import org.json.JSONException;
@@ -30,6 +33,11 @@ public class Context extends VariablePinner {
     private PassClient passClient;
     private Map<String, Object> values;
 
+    public Context() {
+        this.headers = new HashMap<String, String>();
+        this.values = new HashMap<String, Object>();
+    }
+
     public Context(String submission, Map<String, String> headers, PassClient passClient) {
         this.submission = submission;
         this.headers = headers;
@@ -47,7 +55,7 @@ public class Context extends VariablePinner {
 
     /**
      * Init values map with request headers
-     * 
+     *
      * @param source - the URI or JSON blob to be resolved
      * @throws Exception - values map could not be initialised
      */
@@ -334,20 +342,29 @@ public class Context extends VariablePinner {
      */
     public void resolveToObject(Variable v, String source) throws Exception {
         ResolvedObject resolved = new ResolvedObject();
+        resolved.setSource(source);
 
         try {
             // If it's a URI, try resolving it, otherwise, attempt to decode it as a JSON
             // blob
-            if (source.equals("http")) {
+            if (source.startsWith("http")) {
                 URI uri = new URI(source);
-                // resolved.setObject(passClient.readResource(uri,
-                // resolved.getObject().getMapType()));
+
+                if (source.contains("/policies/")) {
+                    resolved.setObject(passClient.readResource(uri, Policy.class));
+                } else if (source.contains("/repositories/")) {
+                    resolved.setObject(passClient.readResource(uri, Repository.class));
+                } else {
+                    throw new IOException("Expected request for Policy or Repository, instead got " + source);
+                }
+
             } else {
-                JSONObject object = new JSONObject(source);
                 resolved.setObject(new JSONObject(source));
             }
-        } catch (URISyntaxException | JSONException e) {
-            throw new Exception("Unable to resolve source to an object", e);
+        } catch (URISyntaxException | JSONException | IOException e) {
+            throw new Exception("Unable to resolve source to an object " + source, e);
+        } catch (Exception e) {
+            throw new Exception("Unable to resolve source to an object " + source, e);
         }
 
         this.values.put(v.getSegmentName(), resolved);
@@ -375,8 +392,14 @@ public class Context extends VariablePinner {
                 // blob
                 if (source.startsWith("http")) {
                     URI uri = new URI(source);
-                    // resolved.setObject(passClient.readResource(uri,
-                    // resolved.getObject().getMapType()));
+
+                    if (source.contains("/policies/")) {
+                        resolved.setObject(passClient.readResource(uri, Policy.class));
+                    } else if (source.contains("/repositories/")) {
+                        resolved.setObject(passClient.readResource(uri, Repository.class));
+                    } else {
+                        throw new IOException("Expected request for Policy or Repository, instead got " + source);
+                    }
                 } else {
                     resolved.setObject(new JSONObject(source));
                 }
@@ -387,8 +410,10 @@ public class Context extends VariablePinner {
             this.values.put(v.getSegmentName(), objects);
             this.values.put(v.getSegment(), objects);
 
-        } catch (URISyntaxException | JSONException e) {
+        } catch (URISyntaxException | JSONException | IOException e) {
             throw new Exception("Unable to resolve source to an object", e);
+        } catch (Exception e) {
+            throw new Exception("Unable to resolve source to an object " + vals, e);
         }
     }
 
@@ -408,4 +433,61 @@ public class Context extends VariablePinner {
 
         return uniqueVals;
     }
+
+    /**
+     * @return String
+     */
+    public String getSubmission() {
+        return this.submission;
+    }
+
+    /**
+     * @param submission
+     */
+    public void setSubmission(String submission) {
+        this.submission = submission;
+    }
+
+    /**
+     * @return Map<String, String>
+     */
+    public Map<String, String> getHeaders() {
+        return this.headers;
+    }
+
+    /**
+     * @param headers
+     */
+    public void setHeaders(Map<String, String> headers) {
+        this.headers = headers;
+    }
+
+    /**
+     * @return PassClient
+     */
+    public PassClient getPassClient() {
+        return this.passClient;
+    }
+
+    /**
+     * @param passClient
+     */
+    public void setPassClient(PassClient passClient) {
+        this.passClient = passClient;
+    }
+
+    /**
+     * @return Map<String, Object>
+     */
+    public Map<String, Object> getValues() {
+        return this.values;
+    }
+
+    /**
+     * @param values
+     */
+    public void setValues(Map<String, Object> values) {
+        this.values = values;
+    }
+
 }
