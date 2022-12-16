@@ -57,21 +57,21 @@ public class Context extends VariablePinner {
      * Init values map with request headers
      *
      * @param source - the URI or JSON blob to be resolved
-     * @throws Exception - values map could not be initialised
+     * @throws IOException - values map could not be initialised
      */
-    public void init(String source) throws Exception {
+    public void init(String source) throws IOException {
 
         // if the values && headers map are already initialised, we're done
         if (this.values.size() == 0) {
             if (this.submission == null) {
-                throw new Exception("Context requires a submission URI");
+                throw new IOException("Context requires a submission URI");
             }
 
             this.values.put("submission", this.submission);
         }
 
         if (this.headers.size() == 0) {
-            throw new Exception("Context requires a map of request headers");
+            throw new IOException("Context requires a map of request headers");
         }
 
         JSONObject object = new JSONObject(this.headers);
@@ -80,10 +80,14 @@ public class Context extends VariablePinner {
     }
 
     @Override
-    public List<String> resolve(String source) throws Exception {
+    public List<String> resolve(String source) throws RuntimeException {
         // Initialise the values map and create a new list to store the resolved
         // variables
-        this.init(source);
+        try {
+            this.init(source);
+        } catch (IOException e) {
+            throw new RuntimeException("Unable to initialise context : " + this, e);
+        }
         List<String> resolved = new ArrayList<String>();
 
         // Check for proper variable conversion. If the conversion is null, return the
@@ -99,8 +103,8 @@ public class Context extends VariablePinner {
         for (segment = variable.shift(); variable.isShifted(); segment = segment.shift()) {
             try {
                 this.resolveSegment(segment);
-            } catch (Exception e) {
-                throw new Exception("Could not resolve variable segment " + segment.getSegmentName(), e);
+            } catch (IOException e) {
+                throw new RuntimeException("Could not resolve variable segment " + segment.getSegmentName(), e);
             }
         }
 
@@ -148,7 +152,7 @@ public class Context extends VariablePinner {
     }
 
     @Override
-    public VariablePinner pin(Object variable, Object value) throws Exception {
+    public VariablePinner pin(Object variable, Object value) throws IOException {
         if (variable instanceof String && value instanceof String) {
             Variable parsed = Variable.toVariable((String) variable);
 
@@ -174,7 +178,7 @@ public class Context extends VariablePinner {
             return this;
 
         } else {
-            throw new Exception("Must supply two Strings: A variable, and a value to pin");
+            throw new IOException("Must supply two Strings: A variable, and a value to pin");
         }
     }
 
@@ -183,9 +187,9 @@ public class Context extends VariablePinner {
      *
      * @param segment - the segment to be resolved
      * @return Boolean - a segment will either resolve or fail
-     * @throws Exception - segment could not be resolved
+     * @throws IOException - segment could not be resolved
      */
-    public void resolveSegment(Variable segment) throws Exception {
+    public void resolveSegment(Variable segment) throws IOException {
 
         // If we already have a value, no need to re-resolve it. Likewise, no point in
         // resolving ${} from ${x}
@@ -235,7 +239,8 @@ public class Context extends VariablePinner {
 
             for (Object item : (List<Object>) prevValue) {
                 if (!(item instanceof String)) {
-                    throw new Exception("Expecting list items to be strings, instead got " + item.getClass().getName());
+                    throw new IOException(
+                            "Expecting list items to be strings, instead got " + item.getClass().getName());
                 }
 
                 list.add((String) item);
@@ -244,7 +249,7 @@ public class Context extends VariablePinner {
             try {
                 this.resolveToObjects(segment.prev(), list);
             } catch (Exception e) {
-                throw new Exception("Could not resolve all uris in " + segment.prev().getSegmentName(), e);
+                throw new IOException("Could not resolve all uris in " + segment.prev().getSegmentName(), e);
             }
 
             this.resolveSegment(segment);
@@ -258,7 +263,7 @@ public class Context extends VariablePinner {
             // Case Default
             // ${bar} is some unexpected type.
 
-            throw new Exception(segment.prev().getSegmentName() + " is a" + prevValue.getClass().getName()
+            throw new IOException(segment.prev().getSegmentName() + " is a" + prevValue.getClass().getName()
                     + ", cannot parse into an object to extract " + segment.getSegmentName());
         }
     }
@@ -268,9 +273,9 @@ public class Context extends VariablePinner {
      *
      * @param v        - the variable to extract
      * @param resolved - the resolved Object
-     * @throws Exception - Object is not a String
+     * @throws IOException - Object is not a String
      */
-    public void extractValue(Variable v, ResolvedObject resolved) throws Exception {
+    public void extractValue(Variable v, ResolvedObject resolved) throws IOException {
         Object val = resolved.getObject().get(v.getSegment());
 
         if (val == null) {
@@ -279,7 +284,7 @@ public class Context extends VariablePinner {
         }
 
         if (!(val instanceof String) || val instanceof List<?>) {
-            throw new Exception(v.getSegmentName() + " is " + val.getClass().getName() + ", or a list, not a String");
+            throw new IOException(v.getSegmentName() + " is " + val.getClass().getName() + ", or a list, not a String");
         }
 
         List<String> valList = new ArrayList<String>();
@@ -294,9 +299,9 @@ public class Context extends VariablePinner {
      *
      * @param v        - the variable to extract
      * @param resolved - the resolved Object
-     * @throws Exception - Object does not contain a list of Strings
+     * @throws IOException - Object does not contain a list of Strings
      */
-    public void extractValues(Variable v, List<ResolvedObject> resolvedList) throws Exception {
+    public void extractValues(Variable v, List<ResolvedObject> resolvedList) throws IOException {
         List<String> vals = new ArrayList<String>();
 
         for (ResolvedObject resolved : resolvedList) {
@@ -315,14 +320,14 @@ public class Context extends VariablePinner {
                             String strVal = (String) item;
                             vals.add(strVal);
                         } else {
-                            throw new Exception(
+                            throw new IOException(
                                     v.getSegmentName() + " is a list of " + item.getClass().getName()
                                             + ", not Strings");
                         }
                     }
                 } else {
                     // Case default
-                    throw new Exception(
+                    throw new IOException(
                             v.getSegmentName() + " is a " + typedVal.getClass().getName() + ", not a String");
                 }
             }
@@ -338,9 +343,9 @@ public class Context extends VariablePinner {
      *
      * @param v - the variable to resolve
      * @param s - the URI to be resolved
-     * @throws Exception - the source is not a valid URI or JSON blob
+     * @throws RuntimeException - the source is not a valid URI or JSON blob
      */
-    public void resolveToObject(Variable v, String source) throws Exception {
+    public void resolveToObject(Variable v, String source) throws RuntimeException {
         ResolvedObject resolved = new ResolvedObject();
         resolved.setSource(source);
 
@@ -362,9 +367,7 @@ public class Context extends VariablePinner {
                 resolved.setObject(new JSONObject(source));
             }
         } catch (URISyntaxException | JSONException | IOException e) {
-            throw new Exception("Unable to resolve source to an object " + source, e);
-        } catch (Exception e) {
-            throw new Exception("Unable to resolve source to an object " + source, e);
+            throw new RuntimeException("Unable to resolve source to an object " + source, e);
         }
 
         this.values.put(v.getSegmentName(), resolved);
@@ -377,9 +380,9 @@ public class Context extends VariablePinner {
      *
      * @param v    - the variable to resolve
      * @param vals - the list of URIs to be resolved
-     * @throws Exception - source could not be resolved
+     * @throws RuntimeException - source could not be resolved
      */
-    public void resolveToObjects(Variable v, List<String> vals) throws Exception {
+    public void resolveToObjects(Variable v, List<String> vals) throws RuntimeException {
         List<ResolvedObject> objects = new ArrayList<ResolvedObject>();
 
         try {
@@ -411,9 +414,7 @@ public class Context extends VariablePinner {
             this.values.put(v.getSegment(), objects);
 
         } catch (URISyntaxException | JSONException | IOException e) {
-            throw new Exception("Unable to resolve source to an object", e);
-        } catch (Exception e) {
-            throw new Exception("Unable to resolve source to an object " + vals, e);
+            throw new RuntimeException("Unable to resolve source to an object", e);
         }
     }
 

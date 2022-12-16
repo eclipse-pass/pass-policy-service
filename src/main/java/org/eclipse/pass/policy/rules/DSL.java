@@ -27,10 +27,10 @@ public class DSL implements PolicyResolver {
      *
      * @param variables - the ruleset to be resolved against
      * @return List<Policy> - the List of resolved policies
-     * @throws Exception
+     * @throws RuntimeException - Policy rule could not be resolved
      */
     @Override
-    public List<Policy> resolve(VariablePinner variables) throws Exception {
+    public List<Policy> resolve(VariablePinner variables) throws RuntimeException {
         List<Policy> resolvedPolicies = new ArrayList<Policy>();
 
         for (Policy policy : policies) {
@@ -42,8 +42,8 @@ public class DSL implements PolicyResolver {
                     resolvedPolicies.addAll(resolved);
                 }
 
-            } catch (Exception e) {
-                throw new Exception("Could not resolve policy rule", e);
+            } catch (RuntimeException e) {
+                throw new RuntimeException("Could not resolve policy rule", e);
             }
         }
 

@@ -72,7 +72,7 @@ public class RepositoriesServlet extends HttpServlet {
         // call to policy service
         try {
             List<Repository> repositories = policyService.findRepositories(submission, headers);
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
         }
 

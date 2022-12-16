@@ -14,5 +14,5 @@ import org.eclipse.pass.policy.components.VariablePinner;
  */
 public interface PolicyResolver {
 
-    public List<Policy> resolve(VariablePinner variables) throws Exception;
+    public List<Policy> resolve(VariablePinner variables) throws RuntimeException;
 }

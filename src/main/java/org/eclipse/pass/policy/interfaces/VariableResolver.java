@@ -17,8 +17,8 @@ public interface VariableResolver {
      *
      * @param varString - the variable to resolve
      * @return List<String> - a list of resolved variables
-     * @throws Exception - if the variable could not be resolved
+     * @throws RuntimeException - the variable could not be resolved
      */
-    public List<String> resolve(String varString) throws Exception;
+    public List<String> resolve(String varString) throws RuntimeException;
 
 }

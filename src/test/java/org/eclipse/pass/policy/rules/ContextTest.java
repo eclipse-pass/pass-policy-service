@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
@@ -140,24 +141,30 @@ public class ContextTest {
         Variable v = new Variable("foo.bar.baz.policy");
         v.setSegment("policySegmentName");
         v.setSegmentName("policySegment");
-        List<ResolvedObject> expected = Arrays.asList(
-                new ResolvedObject("http://example.com/policies/1", mockPolicy),
-                new ResolvedObject("http://example.com/policies/2", mockPolicy));
-        when(mockPassClient.readResource(new URI("http://example.com/policies/1"),
-                Policy.class))
-                .thenReturn(mockPolicy);
-        when(mockPassClient.readResource(new URI("http://example.com/policies/2"),
-                Policy.class))
-                .thenReturn(mockPolicy);
+        List<ResolvedObject> expected;
         try {
-            context.setPassClient(mockPassClient);
-            context.resolveToObjects(v, uris);
-        } catch (Exception e) {
-            fail("Unexpected Exception thrown for valid submission", e);
-        }
+            expected = Arrays.asList(
+                    new ResolvedObject("http://example.com/policies/1", mockPolicy),
+                    new ResolvedObject("http://example.com/policies/2", mockPolicy));
 
-        assertTrue(expected.equals(context.getValues().get("policySegmentName")));
-        assertTrue(expected.equals(context.getValues().get("policySegmentName")));
+            when(mockPassClient.readResource(new URI("http://example.com/policies/1"),
+                    Policy.class))
+                    .thenReturn(mockPolicy);
+            when(mockPassClient.readResource(new URI("http://example.com/policies/2"),
+                    Policy.class))
+                    .thenReturn(mockPolicy);
+            try {
+                context.setPassClient(mockPassClient);
+                context.resolveToObjects(v, uris);
+            } catch (Exception e) {
+                fail("Unexpected Exception thrown for valid submission", e);
+            }
+
+            assertTrue(expected.equals(context.getValues().get("policySegmentName")));
+            assertTrue(expected.equals(context.getValues().get("policySegmentName")));
+        } catch (IOException e1) {
+            fail("Failed to initialise ResolvedObjects");
+        }
     }
 
     // @Test
