@@ -15,6 +15,8 @@ import java.util.List;
 import org.dataconservancy.pass.client.PassClient;
 import org.dataconservancy.pass.model.Policy;
 import org.eclipse.pass.policy.components.ResolvedObject;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -103,7 +105,7 @@ public class ContextTest {
         try {
             context.init("source");
             fail("Expected exception to be thrown for no submission URI");
-        } catch (Exception e) {
+        } catch (IOException e) {
             assertEquals("Context requires a submission URI", e.getMessage());
         }
     }
@@ -131,10 +133,122 @@ public class ContextTest {
     /**
      * Unit tests for resolveToObject() method in Context
      */
+    @Test
+    @DisplayName("Test: Test resolveToObject() with a valid submission URI")
+    public void testResolveToObjectValidURI() throws URISyntaxException {
+        String uri = "http://example.com/policies/1";
+        Variable v = new Variable("foo.bar.baz.policy");
+        v.setSegment("policySegmentName");
+        v.setSegmentName("policySegment");
+        ResolvedObject expected = null;
+        try {
+            expected = new ResolvedObject("http://example.com/policies/1", mockPolicy);
+        } catch (IOException e) {
+            fail("Unexpected exception thrown for valid submission URI", e);
+        }
+
+        when(mockPassClient.readResource(new URI("http://example.com/policies/1"),
+                Policy.class))
+                .thenReturn(mockPolicy);
+        try {
+            context.setPassClient(mockPassClient);
+            context.resolveToObject(v, uri);
+        } catch (RuntimeException e) {
+            fail("Unexpected Exception thrown for valid submission", e);
+        }
+
+        assertTrue(expected.equals(context.getValues().get("policySegmentName")));
+        assertTrue(expected.equals(context.getValues().get("policySegmentName")));
+    }
 
     @Test
+    @DisplayName("Test: Test resolveToObject() with an invalid submission URI")
+    public void testResolveToObjectInvalidURI() throws URISyntaxException {
+        String uri = "http://example.com/1";
+        Variable v = new Variable("foo.bar.baz.policy");
+        v.setSegment("policySegmentName");
+        v.setSegmentName("policySegment");
+
+        try {
+            context.setPassClient(mockPassClient);
+            context.resolveToObject(v, uri);
+        } catch (RuntimeException e) {
+            assertTrue(e.getCause() instanceof IOException);
+            return;
+        }
+
+        fail("resolveToObject() should throw a RuntimeException when invalid submissions are given");
+    }
+
+    @Test
+    @DisplayName("Test: Test resolveToObject() with an invalid submission")
+    public void testResolveToObjectInvalid() throws URISyntaxException {
+        String uri = "example.com/policies/1";
+        Variable v = new Variable("foo.bar.baz.policy");
+        v.setSegment("policySegmentName");
+        v.setSegmentName("policySegment");
+        try {
+            context.setPassClient(mockPassClient);
+            context.resolveToObject(v, uri);
+        } catch (RuntimeException e) {
+            assertTrue(e.getCause() instanceof JSONException);
+            return;
+        }
+
+        fail("resolveToObject() should throw a RuntimeException when invalid submissions are given");
+    }
+
+    @Test
+    @DisplayName("Test: Test resolveToObject() with a valid JSON string")
+    public void testResolveToObjectValidJSON() {
+        String json = "{"
+                + "\"policy-id\": \"1\","
+                + "\"description\": \"test\","
+                + "}";
+        Variable v = new Variable("foo.bar.baz.policy");
+        v.setSegment("policySegmentName");
+        v.setSegmentName("policySegment");
+        ResolvedObject expected = new ResolvedObject(json, new JSONObject(json));
+
+        try {
+            context.setPassClient(mockPassClient);
+            context.resolveToObject(v, json);
+        } catch (RuntimeException e) {
+            fail("Unexpected Exception thrown for valid submission", e);
+        }
+
+        assertTrue(expected.equals(context.getValues().get("policySegmentName")));
+        assertTrue(expected.equals(context.getValues().get("policySegmentName")));
+    }
+
+    @Test
+    @DisplayName("Test: Test resolveToObject() with an invalid JSON string")
+    public void testResolveToObjectInvalidJSON() {
+        String json = "{"
+                + "\"policy-id\"1\","
+                + "\"description\": \"test\","
+                + "}";
+        Variable v = new Variable("foo.bar.baz.policy");
+        v.setSegment("policySegmentName");
+        v.setSegmentName("policySegment");
+
+        try {
+            context.setPassClient(mockPassClient);
+            context.resolveToObject(v, json);
+        } catch (RuntimeException e) {
+            assertTrue(e.getCause() instanceof JSONException);
+            return;
+        }
+
+        fail("resolveToObject() should throw a RuntimeException when invalid submissions are given");
+    }
+
+    /**
+     * Unit tests for resolveToObjects() method in Context
+     */
+    @Test
     @DisplayName("Test: Test resolveToObjects() with a list of valid submission URIs")
-    public void testResolveToObjectsValid() throws URISyntaxException {
+    public void testResolveToObjectsValidURI() {
         List<String> uris = Arrays.asList(
                 "http://example.com/policies/1",
                 "http://example.com/policies/2");
@@ -156,40 +270,111 @@ public class ContextTest {
             try {
                 context.setPassClient(mockPassClient);
                 context.resolveToObjects(v, uris);
-            } catch (Exception e) {
+            } catch (RuntimeException e) {
                 fail("Unexpected Exception thrown for valid submission", e);
             }
 
             assertTrue(expected.equals(context.getValues().get("policySegmentName")));
             assertTrue(expected.equals(context.getValues().get("policySegmentName")));
-        } catch (IOException e1) {
-            fail("Failed to initialise ResolvedObjects");
+        } catch (URISyntaxException | IOException e) {
+            fail("Unexpected Exception thrown for valid submission", e);
         }
     }
 
-    // @Test
-    // public void testResolveToObjects_policyUri() throws Exception {
-    // List<String> vals = Arrays.asList("http://example.com/policies/123");
-    // Variable v = new Variable("someName", "someSegment");
+    @Test
+    @DisplayName("Test: Test resolveToObjects() with a list of invalid submission URIs")
+    public void testResolveToObjectsInvalidURI() throws URISyntaxException {
+        List<String> uris = Arrays.asList(
+                "http://example.com/1",
+                "http://example.com/2");
+        Variable v = new Variable("foo.bar.baz.policy");
+        v.setSegment("policySegmentName");
+        v.setSegmentName("policySegment");
+        try {
+            context.setPassClient(mockPassClient);
+            context.resolveToObjects(v, uris);
+        } catch (RuntimeException e) {
+            assertTrue(e.getCause() instanceof IOException);
+            return;
+        }
 
-    // MyClass testClass = new MyClass();
-    // testClass.resolveToObjects(v, vals);
+        fail("resolveToObjects() should throw a RuntimeException when invalid submissions are given");
+    }
 
-    // // Verify that the values map contains the expected keys and values
-    // assertTrue(testClass.values.containsKey("someName"));
-    // assertTrue(testClass.values.containsKey("someSegment"));
-    // assertEquals(1, testClass.values.get("someName").size());
-    // assertEquals(1, testClass.values.get("someSegment").size());
+    @Test
+    @DisplayName("Test: Test resolveToObjects() with a list of invalid submissions")
+    public void testResolveToObjectsInvalid() throws URISyntaxException {
+        List<String> uris = Arrays.asList(
+                "example.com/policies/1",
+                "example.com/policies/2");
+        Variable v = new Variable("foo.bar.baz.policy");
+        v.setSegment("policySegmentName");
+        v.setSegmentName("policySegment");
+        try {
+            context.setPassClient(mockPassClient);
+            context.resolveToObjects(v, uris);
+        } catch (RuntimeException e) {
+            assertTrue(e.getCause() instanceof JSONException);
+            return;
+        }
 
-    // // Verify that the resolved object is of the expected type and has the
-    // expected
-    // // properties
-    // ResolvedObject resolved = testClass.values.get("someName").get(0);
-    // assertTrue(resolved.getObject() instanceof Policy);
-    // assertEquals("http://example.com/policies/123", resolved.getSource());
-    // assertEquals("123", resolved.getObject().getId());
-    // assertEquals("Policy 123", resolved.getObject().getName());
-    // // (and so on for any other relevant properties of the Policy object)
-    // }
+        fail("resolveToObjects() should throw a RuntimeException when invalid submissions are given");
+    }
 
+    @Test
+    @DisplayName("Test: Test resolveToObjects() with a list of valid JSON strings")
+    public void testResolveToObjectsValidJSON() throws URISyntaxException {
+        List<String> json = Arrays.asList(
+                "{"
+                        + "\"policy-id\": \"1\","
+                        + "\"description\": \"test\","
+                        + "}",
+                "{"
+                        + "\"policy-id\": \"2\","
+                        + "\"description\": \"test\","
+                        + "}");
+        Variable v = new Variable("foo.bar.baz.policy");
+        v.setSegment("policySegmentName");
+        v.setSegmentName("policySegment");
+        List<ResolvedObject> expected = Arrays.asList(
+                new ResolvedObject(json.get(0), new JSONObject(json.get(0))),
+                new ResolvedObject(json.get(1), new JSONObject(json.get(1))));
+
+        try {
+            context.setPassClient(mockPassClient);
+            context.resolveToObjects(v, json);
+        } catch (RuntimeException e) {
+            fail("Unexpected Exception thrown for valid submission", e);
+        }
+
+        assertTrue(expected.equals(context.getValues().get("policySegmentName")));
+        assertTrue(expected.equals(context.getValues().get("policySegmentName")));
+    }
+
+    @Test
+    @DisplayName("Test: Test resolveToObjects() with a list of invalid JSON strings")
+    public void testResolveToObjectsInvalidJSON() throws URISyntaxException {
+        List<String> json = Arrays.asList(
+                "{"
+                        + "\"policy-id\"1\","
+                        + "\"description\": \"test\","
+                        + "}",
+                "{"
+                        + "\"policy-id,"
+                        + "\"description\": \"test\","
+                        + "}");
+        Variable v = new Variable("foo.bar.baz.policy");
+        v.setSegment("policySegmentName");
+        v.setSegmentName("policySegment");
+
+        try {
+            context.setPassClient(mockPassClient);
+            context.resolveToObjects(v, json);
+        } catch (RuntimeException e) {
+            assertTrue(e.getCause() instanceof JSONException);
+            return;
+        }
+
+        fail("resolveToObjects() should throw a RuntimeException when invalid submissions are given");
+    }
 }
