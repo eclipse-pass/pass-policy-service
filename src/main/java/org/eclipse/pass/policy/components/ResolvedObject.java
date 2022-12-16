@@ -1,5 +1,6 @@
 package org.eclipse.pass.policy.components;
 
+import java.io.IOException;
 import java.util.Objects;
 
 import org.json.JSONException;
@@ -26,7 +27,7 @@ public class ResolvedObject {
         this.object = object;
     }
 
-    public ResolvedObject(String source, Object object) {
+    public ResolvedObject(String source, Object object) throws IOException {
         this.source = source;
         this.setObject(object);
     }
@@ -92,14 +93,15 @@ public class ResolvedObject {
     /**
      * setObject(Object)
      *
-     * @param object
+     * @param object - an object to be parsed into JSON
+     * @throws IOException - object is not a valid JSON object
      */
-    public void setObject(Object object) {
+    public void setObject(Object object) throws IOException {
         try {
             JSONObject json = new JSONObject(object);
             this.setObject(json);
         } catch (JSONException e) {
-            throw new JSONException("Unable to resolve " + object + " to a valid JSON object", e);
+            throw new IOException("Unable to resolve " + object + " to a valid JSON object", e);
         }
     }
 

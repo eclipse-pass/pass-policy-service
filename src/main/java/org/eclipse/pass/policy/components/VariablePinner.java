@@ -1,5 +1,7 @@
 package org.eclipse.pass.policy.components;
 
+import java.io.IOException;
+
 import org.eclipse.pass.policy.interfaces.VariableResolver;
 
 /**
@@ -17,7 +19,7 @@ public abstract class VariablePinner implements VariableResolver {
      * @param variable - the URI to pin to
      * @param value    - the value to be pinned
      * @return VariablePinner - the pinned object to be returned
-     * @throws Exception - incorrect object types supplied
+     * @throws IOException - incorrect object types supplied
      */
-    public abstract VariablePinner pin(Object variable, Object value) throws Exception;
+    public abstract VariablePinner pin(Object variable, Object value) throws IOException;
 }

@@ -1,6 +1,8 @@
 package org.eclipse.pass.policy.rules;
 
+import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -31,7 +33,7 @@ public class PolicyRules {
      * @return List<Policy> - the List of resolved Policies
      * @throws Exception - Policy could not be resolved
      */
-    public List<Policy> resolve(Policy policy, VariablePinner variables) throws Exception {
+    public List<Policy> resolve(Policy policy, VariablePinner variables) throws RuntimeException {
         List<Policy> resolvedPolicies = new ArrayList<Policy>();
         List<Repository> resolvedRepos = new ArrayList<Repository>();
 
@@ -45,7 +47,7 @@ public class PolicyRules {
             try {
                 resolvedIDs.addAll(variables.resolve(policy.getId().toString()));
 
-                String curID = resolvedIDs.get(0); // for exception handling
+                String curID = resolvedIDs.get(0); // for RuntimeException handling
                 try {
 
                     for (String id : resolvedIDs) {
@@ -68,11 +70,11 @@ public class PolicyRules {
 
                         resolvedPolicies.add(resolved);
                     }
-                } catch (Exception e) {
-                    throw new Exception("Could not resolve policy rule for " + curID.toString());
+                } catch (URISyntaxException | IOException | RuntimeException e) {
+                    throw new RuntimeException("Could not resolve policy rule for " + curID.toString(), e);
                 }
-            } catch (Exception e) {
-                throw new Exception("Could not resolve property ID " + policy.getId().toString(), e);
+            } catch (RuntimeException e) {
+                throw new RuntimeException("Could not resolve property ID " + policy.getId().toString(), e);
             }
 
         } else {
@@ -89,11 +91,11 @@ public class PolicyRules {
                     if (valid) {
                         resolvedPolicies.add(policy);
                     }
-                } catch (Exception e) {
-                    throw new Exception("Error applying conditions to policy " + policy.getId().toString());
+                } catch (RuntimeException e) {
+                    throw new RuntimeException("Failed to apply conditions to policy " + policy.getId().toString(), e);
                 }
-            } catch (Exception e) {
-                throw new Exception("Could not resolve repositories in policy " + policy.getId().toString(), e);
+            } catch (RuntimeException e) {
+                throw new RuntimeException("Could not resolve repositories in policy " + policy.getId().toString(), e);
             }
         }
 
@@ -107,9 +109,9 @@ public class PolicyRules {
      * @param policy    - the parent Policy for repositories
      * @param variables - the variables to resolved against
      * @return List<Repository> - the list of resolved repositories
-     * @throws Exception - repositories could not be resolved
+     * @throws RuntimeException - repositories could not be resolved
      */
-    public List<Repository> resolveRepositories(Policy policy, VariablePinner variables) throws Exception {
+    public List<Repository> resolveRepositories(Policy policy, VariablePinner variables) throws RuntimeException {
         List<Repository> resolvedRepos = new ArrayList<Repository>();
 
         try {
@@ -118,8 +120,8 @@ public class PolicyRules {
 
                 resolvedRepos.addAll(repos);
             }
-        } catch (Exception e) {
-            throw new Exception("Could not resolve repositories for " + policy.getId().toString(), e);
+        } catch (RuntimeException e) {
+            throw new RuntimeException("Could not resolve repositories for " + policy.getId().toString(), e);
         }
 
         return resolvedRepos;
@@ -132,9 +134,9 @@ public class PolicyRules {
      *
      * @param variables - the variables to check conditions against
      * @return Boolean - true if variables meet all conditions, false otherwise
-     * @throws Exception - Condition could not be resolved
+     * @throws RuntimeException - Condition could not be resolved
      */
-    private Boolean applyConditions(VariablePinner variables) throws Exception {
+    private Boolean applyConditions(VariablePinner variables) throws RuntimeException {
         Boolean valid;
         try {
             for (Condition cond : this.conditions) {
@@ -144,8 +146,8 @@ public class PolicyRules {
                     return false;
                 }
             }
-        } catch (Exception e) {
-            throw new Exception("Invalid condition", e);
+        } catch (RuntimeException e) {
+            throw new RuntimeException("Invalid condition", e);
         }
 
         return true;
