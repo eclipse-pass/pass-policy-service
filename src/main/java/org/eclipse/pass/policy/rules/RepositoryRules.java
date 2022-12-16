@@ -1,6 +1,7 @@
 package org.eclipse.pass.policy.rules;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,9 +29,9 @@ public class RepositoryRules {
      *
      * @param variables - the ruleset to be resolved against
      * @return List<Repository> - the List of resolved Repositories
-     * @throws Exception - Repository could not be resolved
+     * @throws RuntimeException - Repository could not be resolved
      */
-    public List<Repository> resolve(URI repo, VariableResolver variables) throws Exception {
+    public List<Repository> resolve(URI repo, VariableResolver variables) throws RuntimeException {
         List<Repository> resolvedRepos = new ArrayList<Repository>();
         Repository repository = passClient.readResource(repo, Repository.class);
 
@@ -49,8 +50,8 @@ public class RepositoryRules {
 
                     resolvedRepos.add(resolved);
                 }
-            } catch (Exception e) {
-                throw new Exception("Could not resolve property ID " + repository.getId().toString(), e);
+            } catch (URISyntaxException | RuntimeException e) {
+                throw new RuntimeException("Could not resolve property ID " + repository.getId().toString(), e);
             }
         } else {
             resolvedRepos.add(repository);

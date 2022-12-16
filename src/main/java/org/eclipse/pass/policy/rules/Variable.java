@@ -26,7 +26,7 @@ public class Variable extends VariablePinner {
     }
 
     @Override
-    public List<String> resolve(String varString) throws Exception {
+    public List<String> resolve(String varString) throws RuntimeException {
         List<String> resolvedVar = new ArrayList<String>();
         resolvedVar.add(varString);
         return resolvedVar;

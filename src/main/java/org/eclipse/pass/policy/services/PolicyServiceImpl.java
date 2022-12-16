@@ -32,13 +32,13 @@ public class PolicyServiceImpl implements PolicyService {
     }
 
     @Override
-    public List<Policy> findPolicies(String submission, Map<String, String> headers) throws Exception {
+    public List<Policy> findPolicies(String submission, Map<String, String> headers) throws RuntimeException {
         Context context = new Context(submission, headers, passClient);
         DSL dsl = new DSL();
         try {
             return dsl.resolve(context);
-        } catch (Exception e) {
-            throw new Exception("Could not resolve policy rule", e);
+        } catch (RuntimeException e) {
+            throw new RuntimeException("Could not resolve policy rule", e);
         }
     }
 
@@ -47,7 +47,7 @@ public class PolicyServiceImpl implements PolicyService {
     // }
 
     @Override
-    public List<Repository> findRepositories(URI submissionURI, Map<String, Object> headers) {
+    public List<Repository> findRepositories(URI submissionURI, Map<String, Object> headers) throws RuntimeException {
         return null;
     }
     // public void reconcileRepositories() {

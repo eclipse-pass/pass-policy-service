@@ -83,7 +83,7 @@ public class PolicyServlet extends HttpServlet {
         // findPolicies() relevant to request
         try {
             List<Policy> policies = policyService.findPolicies(submission, headers);
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             LOG.error("Unable to find relevant policies", e);
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
             return;
